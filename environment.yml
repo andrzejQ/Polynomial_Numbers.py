@@ -4,7 +4,7 @@ channels:
 dependencies:
   - ca-certificates=2018.03.07=0
   - certifi=2018.4.16=py36_0
-  - cycler=0.10.0=py36hd299a41_0
+  - cycler=0.10.0
   - freetype=2.8=h0224ed4_1
   - icc_rt=2017.0.4=h97af966_0
   - icu=58.2=h3fcc66b_1
