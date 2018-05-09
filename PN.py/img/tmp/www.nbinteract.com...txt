@@ -1,6 +1,47 @@
+
+
 https://www.nbinteract.com/
+
+========================================
+
+https://hub.mybinder.org/user/andrzejq-nbinteract-image-ujhkzg5w/tree
+
+
+https://github.com/SamLau95/nbinteract/issues/74
+CLI
+nbinteract -s "owenrog/nbinteract-image/master" cow.ipynb
+
 
 
 pip install nbinteract
-?
-conda install nbinteract
+(? conda install nbinteract   - failed)
+
+
+(F:\tools\anaconda) C:\Users\user>conda install nbinteract
+Solving environment: failed
+
+(F:\tools\anaconda) C:\Users\user>pip install nbinteract
+Collecting nbinteract
+  Downloading https://files.pythonhosted.org/packages/ea/dd/85d721050f206a4db7a22182e6060fba2aa32ee32439c46ad499c17ae6fe/nbinteract-0.1.8-py3-none-any.whl
+Collecting ipywidgets<7.2,>=7 (from nbinteract)
+  Downloading https://files.pythonhosted.org/packages/25/8b/d416d9500f2e6a0fcd5c248edf6fbe0bd345dd00cbb167b7c92428868522/ipywidgets-7.1.2-py2.py3-none-any.whl (68kB)
+    100% |████████████████████████████████| 71kB 1.5MB/s
+Collecting docopt<0.7,>=0.6.2 (from nbinteract)
+  Downloading https://files.pythonhosted.org/packages/a2/55/8f8cab2afd404cf578136ef2cc5dfb50baa1761b68c9da1fb1e4eed343c9/docopt-0.6.2.tar.gz
+Collecting bqplot<0.11,>=0.10 (from nbinteract)
+  Downloading https://files.pythonhosted.org/packages/7d/bd/384a23db3cc23af113056050744bb7e4580893af6a94f48f2d751f5a6736/bqplot-0.10.5-py2.py3-none-any.whl (1.5MB)
+    100% |████████████████████████████████| 1.5MB ...
+  Downloading https://files.pythonhosted.org/packages/fa/ce/f6442355d348f392975ccc2fa50910706913355b8ce72ae3256f7dc0d17e/widgetsnbextension-3.1.4-py2.py3-none-any.whl (2.2MB)
+    100% |████████████████████████████████| 2.2MB ...
+Collecting traittypes>=0.0.6 (from bqplot<0.11,>=0.10->nbinteract)
+  Downloading https://files.pythonhosted.org/packages/73/06/ed815ef101d52e9aa3105580768572c53904cf1e7468867f7194efdcc0ed/traittypes-0.1.0-py2.py3-none-any.whl
+Building wheels for collected packages: docopt
+  Running setup.py bdist_wheel for docopt ... done
+  Stored in directory: C:\Users\user\AppData\Local\pip\Cache\wheels\9b\04\dd\7daf4150b6d9b12949298737de9431a324d4b797ffd63f526e
+Successfully built docopt
+
+distributed 1.21.8 requires msgpack, which is not installed.
+
+Successfully installed bqplot-0.10.5 docopt-0.6.2 ipywidgets-7.1.2 nbinteract-0.1.8 traittypes-0.1.0 widgetsnbextension-3.1.4
+
+(F:\tools\anaconda) C:\Users\user>
