@@ -6,6 +6,8 @@ https://mybinder.org/
 
 failed...
 
+(also with requirements.txt)
+- "Could not find a version that satisfies requirement mkl-fft==1.0.0..."
 
 Virtual env for build env.yml
 =============================
