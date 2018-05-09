@@ -10,8 +10,11 @@ https://hub.mybinder.org/user/andrzejq-nbinteract-image-ujhkzg5w/tree
 https://github.com/SamLau95/nbinteract/issues/74
 CLI
 nbinteract -s "owenrog/nbinteract-image/master" cow.ipynb
-
-
+nbinteract -s "andrzejQ/nbinteract-image.git/master" tutorial.ipynb
+(F:\tools\anaconda) F:\My\AK\Dokum\Badania\PN.py\PN.py>nbinteract -s "andrzejQ/nbinteract-image.git/master" tutorial.ipynb
+[0;34m[nbinteract] [0mConverting notebooks to HTML...
+[0;34m[nbinteract] [0mConverted tutorial.ipynb to tutorial.html
+[0;34m[nbinteract] [0mDone!
 
 pip install nbinteract
 (? conda install nbinteract   - failed)
