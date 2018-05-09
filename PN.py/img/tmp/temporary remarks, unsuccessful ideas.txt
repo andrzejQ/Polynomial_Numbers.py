@@ -1,0 +1,8 @@
+https://github.com/andrzejQ/Polynomial_Numbers.py.git
+
+<img src="img/xyz.png" width="30%" align="right" alt="xyz">
+- this is working in GitHub Markdown
+
+Don't use in GitHub Markdown:
+$ ... \ $ (additional space at the end of the formula)
+%%html
