@@ -1,0 +1,6 @@
+numpy
+mpmath
+matplotlib
+ipywidgets>=7.0.0
+bqplot
+nbinteract>=0.1.8
