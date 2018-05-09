@@ -6,3 +6,20 @@ https://github.com/andrzejQ/Polynomial_Numbers.py.git
 Don't use in GitHub Markdown:
 $ ... \ $ (additional space at the end of the formula)
 %%html
+----  - as heading mark
+
+
+
+Anchors Markdown:
+Example
+## My paragraph title
+
+will produce an implicit anchor like this
+#My-paragraph-title
+
+The whole URL before each anchor reference is optional, i.e.
+[Some text](#My-paragraph-title)
+
+Derivative of the step function on input of black box:<a class="anchor-link" href="#Derivative-of-the-step-function-on-input-of-black-box:">¶</a>
+
+
