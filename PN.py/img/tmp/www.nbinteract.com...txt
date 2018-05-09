@@ -1,2 +1,6 @@
 https://www.nbinteract.com/
 
+
+pip install nbinteract
+?
+conda install nbinteract
