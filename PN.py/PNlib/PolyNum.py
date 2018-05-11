@@ -1,30 +1,24 @@
 # -*- coding: utf-8 -*-
-"""
+"""\
 PolyNum class 
 ============
-(Polynomial Number class)
+    (Polynomial Number class)
     
-    =========================
-    Floating point arithmetic for "numbers" with digit like real number or items
-    from any arbitrary field, allow solving of differential or difference 
-    problems using Mikusinski's or Bellert's approach.
+    Floating point arithmetic for "numbers" with digit like real number 
+    or items from any arbitrary field, allow solving differential or difference 
+    equations using Mikusinski's or Bellert's approach.
     http://www.pei.prz.edu.pl/%7Ekubaszek/index_en.html
     
     We assume PN in form:                                  
-                                            c             
-            (~m ~, m ~ m ~  ...~) · (~1~0~)               
-               0    1   2                                 
-    where: m - PN mantissa         c - characteristic (chrtic)
-    
-    
-    
-todo:
-    invTr1LaplPN() calculates the inverse Lpn transform in a point t, assuming 
-        s = (~1~0~)
-    invTr05LaplPN()   sqrt(S) = (~1~0~)  i.e. s = (~1~0~0~)
-    invTr05exp_b0_LaplPN
 
-    exp if self.exponent > 0
+            (~m_0 ~, m_1 ~ m_2 ~  ...~) · (~1~0~)^c               
+               
+    where: m - PN mantissa         c - PN exponent
+
+version:
+    0.10, 2018-05-11
+todo:
+    more convenient PN.exp() if self.exponent > 0
 
 """
 from __future__ import division, absolute_import, print_function
@@ -48,43 +42,57 @@ else: #relative package import    #print(f'''__nm__ = {__name__}''')
     from .MantPN import MantPN
 
 class PolyNum(MantPN):
-    """
+    """\
     A Polynomial Number class
     =========================
-    Floating point arithmetic for "numbers" with digit like real number or items
-    from any arbitrary field, allow solving of differential or difference 
-    problems using Mikusinski's or Bellert's approach.
+    
+    Floating point arithmetic for "numbers" with digit like real number 
+    or items from any arbitrary field, allow solving differential or difference 
+    equations using Mikusinski's or Bellert's approach.
     http://www.pei.prz.edu.pl/%7Ekubaszek/index_en.html
+    
+    We assume **Polynomial Number** (**PN**) in form:                                  
+
+            (~m_0 ~, m_1 ~ m_2 ~  ...~) · (~1~0~)^c               
+               
+    where: m - PN mantissa         c - PN exponent
+
     
     Attributes:
     ----------
         mantissa: 
-            the Polynomial Number **(PN)** "digits", in decreasing (negative)
+            (in MantPN) the PN "digits", in decreasing (negative)
             powers, starting from power 0.
-            - see MantPN.py
 
         exponent:
-            int
+            (int)
     
+        _strPN_cut:
+            (int) (not defined by default) could be added to istance, 
+            to show first _strPN_cut digits in str() and repr().
+
     Parameters
     ----------
     mantissa_or_pN_or_str : 
-        if array_like: 
+        array_like type: 
             the Polynomial Number's coefficients, in decreasing (negative)
             powers, starting from power 0. (see class attr. self._max_N)
-        if PN: 
-            input PN to copy, adding exponentAdd to exponent
-        if string: 
+        PN type: 
+            PN to copy on __init__, adding exponentAdd to exponent
+        string type: 
             '<mantissa>*(~1~0~)**(<exponent>)'
-            where <exponent> is integer, <mantissa> is '(~<d0>~,~<d1>~...~)'
-            <d0>,... - real numbers, '~,' or '~,~' denotes "floating point dot"
-            (see class attr. self._sep = '~')
+            where <exponent> is str(integer), 
+                <mantissa> is '(~<d0>~,~<d1>~...~)'
+                <d0>,... - real numbers, '~,' (or '~,~') denotes "radix point"
+                    (see class attr. self._sep = '~')
+            'const:(~2~,-4~4~-4~4~...~)' 
+                p_trap(h)==(2/h)*(~1~-1~)/(~1~1~)==(1/h)*(~2~,-4~4~-4~4~...~)
+            'const:(~1~,2~2~2~2~2~2~...~)'
+                flat samples ready to multiply by (a/2):
+            
     exponentAdd:
         value added to 0 or original PN exponent (if exists)
         
-    #attr `_strPN_cut` (int) could be added to istance, to show first `_strPN_cut` 
-        digits in str() and repr().
-
     Examples
     --------
     - PN zero
@@ -133,7 +141,10 @@ class PolyNum(MantPN):
             return 0
 
     def __init__(self, mantissa_or_pN_or_str=None, exponentAdd=0):
-        """First digit non-zero or zero PN (with mantissa fill of zeroes)"""
+        """\
+        After __init__ first PN digit (self.mantissa[0]) is non-zero or 
+        (in zero PN case) mantissa is filled with zeroes.
+        """
         if isinstance(mantissa_or_pN_or_str, PolyNum):
             super(PolyNum,self).__init__(mantissa_or_pN_or_str.mantissa)
             self._exponent = exponentAdd

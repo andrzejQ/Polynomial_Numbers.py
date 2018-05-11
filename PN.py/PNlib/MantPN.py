@@ -6,8 +6,7 @@ MantPN class
 Fixed-Point Arithmetic of Polynomial Numbers PN
 We assume 1 digits before PN radix point:      
                                                
-     (~a ~, a ~ a ~  ...~)                     
-        0    1   2                             
+     (~a_0 ~, a_1 ~ a_2 ~  ...~)
 
 Mantissa of Polynomial Number is constant length polynomial: 
 a: a[0] * p**(0) + a[1] * p**(-1) + ... +a[M] * p**(-M),
@@ -46,10 +45,17 @@ class MantPN(object):
     """
     A mantissa of Polynomial Number (PN) class
     ==========================================
-    Fixed point arithmetic for "numbers" with digit like real number or items
-    from an arbitrary field. Allow solving of differential or difference problems 
-    using Mikusinski's or Bellert's approach.
-    http://www.pei.prz.edu.pl/%7Ekubaszek/index_en.html
+    MantPN is only supeclass for Polynomial Number class.
+
+    Fixed-Point Arithmetic of Polynomial Numbers PN
+    We assume 1 digits before PN radix point:      
+                                                   
+         (~a_0 ~, a_1 ~ a_2 ~  ...~)
+    
+    Mantissa of Polynomial Number is constant length polynomial: 
+    a: a[0] * p**(0) + a[1] * p**(-1) + ... +a[M] * p**(-M),
+    
+    Values a[n] for high n may be inaccurate due to rounding errors. 
     
     Attributes:
     ----------
