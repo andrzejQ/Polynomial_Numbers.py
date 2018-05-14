@@ -13,5 +13,5 @@ data = Data([trace0, trace1])
 
 py.plot(data, filename = 'basic-line')
 
-(base) ...PN.py\PN.py\img\tmp\Plotly>python py.plt.Zero.py
-High five! You successfully sent some data to your account on plotly. View your plot in your browser at https://plot.ly/~andrzejQ/0 or inside your plot.ly account where it is named 'basic-line'
+# (base) ...PN.py\PN.py\img\tmp\Plotly>python py.plt.Zero.py
+# High five! You successfully sent some data to your account on plotly. View your plot in your browser at https://plot.ly/~andrzejQ/0 or inside your plot.ly account where it is named 'basic-line'
