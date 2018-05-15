@@ -41,8 +41,8 @@ layout_a = go.Layout(autosize=False, width=800, height=220,
     yaxis=dict(range=[-35, 35]), xaxis=dict(title='t',range=[0, 25])
 )
 
-def your_compute_figure_function(h_1): # h_1 = new_slider_value
-    h_a = [0.4,h_1] # diffrent sampling periods for graphs
+def your_compute_figure_function(h_0, h_1): # arg: new_slider_value
+    h_a = [h_0,h_1] # diffrent sampling periods for graphs
     x_a = []
     for h in h_a:  # diffrent sampling periods
         p = 1/h * p_tr
@@ -96,11 +96,11 @@ for h in h_a:  # diffrent sampling periods
 ```
 '''
     ),
-    html.Label('h_1'),
-    dcc.Slider(id='sli_h', value=0.8, min=0.3, max=0.9, step=0.1),
+    html.Label('h_0, h_1'),
+    dcc.RangeSlider(id='sli_h', value=[0.4, 0.8], min=0.3, max=0.9, step=0.05, updatemode='drag'),
     dcc.Graph(
         id='grf2_44_44',
-        figure=your_compute_figure_function(0.7)
+        figure=your_compute_figure_function(0.5, 0.7)
     ),
     dcc.Markdown(children='''\
 ---
@@ -146,8 +146,8 @@ for h in h_b:
 
 @app.callback(Output('grf2_44_44', 'figure'),
              [Input('sli_h', 'value')])
-def your_data_analysis_function(new_slider_value):
-    new_figure = your_compute_figure_function(new_slider_value)
+def your_data_analysis_function(new_slider_values):
+    new_figure = your_compute_figure_function(*new_slider_values)
     return new_figure
 
 if __name__ == '__main__':
