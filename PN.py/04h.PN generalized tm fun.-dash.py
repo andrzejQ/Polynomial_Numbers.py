@@ -12,6 +12,7 @@ from PNlib.PolyNum import PolyNum
 f_1111 = 0.5 * PolyNum('const:(~1~,2~2~2~2~...~)')
 p_tr = PolyNum('const:(~2~,-4~4~-4~4~...~)') # 2*(~1~-1~)/(~1~1~)
 
+from plotly import tools
 import plotly.plotly as py
 import plotly.graph_objs as go
 style = [{"line": {"color": "rgba (255, 0, 0, 1)", "dash": "6px,3px", "width": 0.8}, 
@@ -30,14 +31,6 @@ layout_a = go.Layout(autosize=False, width=700, height=220,
 layout_b = go.Layout(autosize=False, width=700, height=300,
     margin=go.Margin(l=50, r=50, b=40, t=20, pad=4),
     yaxis=dict(range=[-0.5, 0.5]), xaxis=dict(title='t',range=[0, 6.6])
-)
-layout_d_x = go.Layout(autosize=False, width=700, height=200,
-    margin=go.Margin(l=50, r=50, b=40, t=20, pad=4),
-    yaxis=dict(range=[-90000, 90000]), xaxis=dict(title='t',range=[0, 4.6])
-)
-layout_d_y = go.Layout(autosize=False, width=700, height=200,
-    margin=go.Margin(l=50, r=50, b=40, t=20, pad=4),
-    yaxis=dict(range=[-3.0, 2.0]), xaxis=dict(title='t',range=[0, 4.6])
 )
 
 def compute_fig_x_a(h_0, h_1): # arg: new_slider_value
@@ -78,20 +71,24 @@ def compute_fig_x_b0(h_0, h_1): # arg: new_slider_value
     new_figure_b0={'data': go.Data(traces_b0), 'layout': layout_b}
     return new_figure_b0
     
-def compute_fig_xy_d(a, h, xy='x'): # arg: new_slider_value
+def compute_fig_xy_d(a, h): # arg: slider value
     p = 1/h * p_tr
     blackBox1 = 1 / (p**2 + p + 4)
     x_ =  f_1111 * p**(a+1)
-    if xy == 'x':
-        layout_d = layout_d_x
-        traces_d = [ go.Scatter( y=list(x_), x0=0, dx=h, name='x_d(t), a='+str(a)+', h='+str(h), **style[0] ) ]
-    else:
-        y_ = x_ * blackBox1
-        layout_d = layout_d_y
-        traces_d = [ go.Scatter( y=list(y_), x0=0, dx=h, name='y_d(t), a='+str(a)+', h='+str(h), **style[1] ) ]
-    new_figure_d={'data': go.Data(traces_d), 'layout': layout_d}
-    return new_figure_d
-
+    trace_d_x = go.Scatter( y=list(x_), x0=0, dx=h, name='inp.', **style[0])
+    y_ = x_ * blackBox1
+    trace_d_y = go.Scatter( y=list(y_), x0=0, dx=h, name='out.', **style[1])
+    
+    fig = tools.make_subplots(rows=2, cols=1, shared_xaxes=True)
+    fig.append_trace(trace_d_x, 1, 1)
+    fig.append_trace(trace_d_y, 2, 1)
+    fig['layout'].update(height=500, width=700)
+    fig['layout']['xaxis1'].update(range=[0, 4.3], title='t')
+    fig['layout']['xaxis2'].update(range=[0, 4.3], title='t')
+    fig['layout']['yaxis1'].update(range=[-100000, 100000], title='x(t)')
+    fig['layout']['yaxis2'].update(range=[-3.0, 2.0], title='y(t)')
+    return fig
+    
 app.layout = html.Div([
     dcc.Markdown(children=r'''
 # Discrete representations of generalized time domain functions
@@ -239,7 +236,7 @@ for h in h_b:
 
 ## Derivative of the step function on input of black box  
 
-{*x_d(t)*} = { (d/dt)^*a* *δ(t*) } = *p* · {1} · *p*^*a*
+{*x_d(t)*} = { dᵃ/dtᵃ *δ(t*) } = *p* · {1} · *p*ᵃ 
 
 Sequences of the samples, which correspond to this abstract functions - a-th derivative of Dirac's delta function can be used to filter characteristic of DSP algorithm closed in black box.
 
@@ -248,8 +245,10 @@ Sequences of the samples, which correspond to this abstract functions - a-th der
     html.Div([
         html.Label('Change derivative level _a_:'),
         dcc.Slider(
-            id='sli_a', value=2.0, min=-1.0, max=2.6, step=0.1, 
-            updatemode='drag', className='sli_h'),
+            id='sli_a', value=2.0, min=-1.0, max=2.6, step=0.1
+            , updatemode='drag', className='sli_h'
+            , marks={0:0,1:1,2:2} ),
+        html.Div(id='slider-output-a'),
         html.Label('Change sampling step _h_:'),
         dcc.Slider(
             id='sli_h_d', value=0.15, min=0.05, max=0.2, step=0.01, 
@@ -258,20 +257,9 @@ Sequences of the samples, which correspond to this abstract functions - a-th der
         style={'width':600, 'padding':10}
     ),
     dcc.Graph(
-        id='grf_d_x',
-        figure={
-            'data': compute_fig_xy_d(2.0, 0.15, 'x'),
-            'layout': layout_d_x
-        }
-    ),
-    dcc.Graph(
-        id='grf_d_y',
-        figure={
-            'data': compute_fig_xy_d(2.0, 0.15, 'y'),
-            'layout': layout_d_y
-        }
+        id='grf_d',
+        figure=compute_fig_xy_d(2.0, 0.15)
     )
-
 ], 
 className="container"
 )
@@ -294,19 +282,19 @@ def data_analysis_x_b0(new_slider_values):
     new_figure = compute_fig_x_b0(*new_slider_values)
     return new_figure
 
-@app.callback(Output('grf_d_x', 'figure'),
-             [Input('sli_a', 'value'), Input('sli_h_d', 'value')])
-def data_analysis_xy_d(a, h, xy='x'):
-    new_figure = compute_fig_xy_d(a, h, xy='x')
-    return new_figure
+@app.callback(Output('slider-output-a', 'children'),
+             [Input('sli_a', 'value')])
+def update_output_sli_a(a):
+    return '     a = {}'.format(a)
 
-@app.callback(Output('grf_d_y', 'figure'),
+    
+@app.callback(Output('grf_d', 'figure'),
              [Input('sli_a', 'value'), Input('sli_h_d', 'value')])
-def data_analysis_xy_d(a, h, xy='y'):
-    new_figure = compute_fig_xy_d(a, h, xy='y')
+def data_analysis_xy_d(a, h):
+    new_figure = compute_fig_xy_d(a, h)
     return new_figure
 
     
 if __name__ == '__main__':
     app.run_server()
-#√·∫≠≤≥ ⁰¹²³⁴⁵⁶⁸⁹⁺⁻ⁱⁿ⁽⁾ ₀₁₂₃₄₆₇₈₉₊₋₌₎ₐₑₒ ¼½ δ
+# »« √· ⅟  ∫ᵗ≠≤≥ ⁰¹²³⁴⁵⁶⁸⁹⁺⁻ᵃ°ⁱⁿªº⁽⁾ ₀₁₂₃₄₆₇₈₉₊₋₌₎ₐₑₒ ¼½ δ ∞
