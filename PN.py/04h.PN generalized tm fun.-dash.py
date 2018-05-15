@@ -71,21 +71,54 @@ def compute_fig_x_b0(h_0, h_1): # arg: new_slider_value
     return new_figure_b0
         
 app.layout = html.Div([
-    dcc.Markdown(children='''\
+    dcc.Markdown(children=r'''
 # Discrete representations of generalized time domain functions
 
-The functions of continuous time defined for $t \geq 0$, can be expressed in **Mikusinski's operational calculus** in form of functions of **Heaviside's operator** $ p = \cfrac{1}{\int_0^t} $ where $X(p)$ denote $\color{magenta}{\text{Laplace transform}}$ formulas...
+## Laplace transform
+
+The functions of continuous time defined for *t* ≥ 0, can be expressed in **Mikusinski's operational calculus** in form of functions of **Heaviside's operator** *p* = 1 / ∫  
+where *X(p)* denote **Laplace transform** formulas: 
+
+{ *x(t)* } = *X(p)* · *p* · {1}
+
+{1} denotes function, with value 1 for all *t* ≥ 0 .
+
+For example { 200 sin(t) } = ( 200 · 2 / (p² + 4) ) · *p* · {1} .
+
+##  Z-transform
+
+Z-transform corresponds to  { *x(t)* } is determined by series of samples in discrete time *t*_k = *k* *h* , where *k* = 0, 1,... and *h* is the sampling period:
+
+*x* = (~ x₀~, x₁~ x₂~ ... ~) = (x₀  z⁰ + x₁  z⁻¹ + x₂  z⁻² + ...), where z = (~ 1 ~ 0 ~)
+
+Replacing continuous time function {1} by sequence of samples (~ 0.5~, 1~ 1~1~ ...~)..
+and replacing Heaviside operator *p* utilizing algorithm of numerical integration
+
+
+*p* = ( 2 / h ) (1 - z⁻¹) / (1 + z⁻¹) , where z = (~ 1 ~ 0 ~)  
+= ( 2 / h ) (~ 1 ~ , -1 ~) / (~ 1 ~ , 1 ~)  
+= ( 1 / h ) (~ 2~, -4~ 4~ -4~ ...~) 
+
+we obtain expression for approximate sequence of samples of function { _x(t)_ }:
+
+*x* = *X(p)* · *p* · (~0.5~, 1~1~1~ ... ~) 
 
 This way we get discrete samples of abstract functions, like derivative of non-smooth function, like  
-$
-\{x_a(t)\} = \{ \cfrac{\mathrm{d}}{\mathrm{d}t} \delta(t) \} = \color{brown}{ p \cdot \{1\} \cdot \ } \color{magenta}{p} 
-$, 
-where Laplace transform  $ \color{magenta}{X(p) = p} $ or function containing negative delay, like  
-$
-\{x_b(t)\} = \color{brown}{ p \cdot \{1\} \cdot \ } \color{magenta}{ \cfrac{1}{p^2 + p + 4}\ \exp(-(-0.1)\sqrt{p^2 +1}) } 
-$ 
+
+{*x_a(t)*} = { d/dt *δ(t*) } = *p* · {1} · *p*
+
+where Laplace transform  *X(p)* = *p*
+
+or function containing negative delay, like  
+
+{*x_b(t)*} = *p* · {1} · (1 / (*p*² + *p* + 4) exp( -(-0.1)√(*p*² +1) )
+
 (see
 [Mikusinski's remarks about negative delay operator](http://www.pei.prz.edu.pl/~kubaszek/smacd06/JM_OperCalc.html)).
+
+### Digital samples of derivative of the step function:
+
+{*x_a(t)*} = { d/dt *δ(t*) } = *p* · {1} · *p*
 
 ```python
 # Z-transform (live example):
@@ -98,13 +131,15 @@ for h in h_a:  # diffrent sampling periods
     p = 1/h * p_tr
     x_a += [ p * f_1111 * p ]
 ```
-
 '''
     ),
-    html.Label('Change values of sampling step h: o ------------------ o'),
-    dcc.RangeSlider(
-        id='sli_h_a', value=[0.4, 0.8], min=0.3, max=0.9, step=0.05, updatemode='drag',
-        className='sli_h'
+    html.Div([
+        html.Label('Change values of sampling step h: o ------------------ o'),
+        dcc.RangeSlider(
+            id='sli_h_a', value=[0.4, 0.8], min=0.3, max=0.9, step=0.01, 
+            updatemode='drag', className='sli_h')
+        ],
+        style={'width':600, 'padding':10}
     ),
     dcc.Graph(
         id='grf2_44_44',
@@ -114,20 +149,27 @@ for h in h_a:  # diffrent sampling periods
 ---
 ### Digital samples of signal containing negative delay operator:
 
+{*x_b(t)*} = *p* · {1} · (1 / (*p*² + *p* + 4) exp( -(-T₀)√(*p*² +1) )
+
+T₀ = 0.04
+
 ```python
 h_b = [0.15,0.2] # diffrent sampling periods for graphs
 x_b = []
 T_0 = 0.04
 for h in h_b:
     p = 1/h * p_tr
-    x_b += [ p * f_1111 * 1 / (p**2 + p + 4) * ( -(-T_0) * ( (p**2 +1).sqrt() ) ).exp() ]
+    x_b += [ p * f_1111 * 1 / (p² + p + 4) * ( -(-T_0) * ( (p² +1).sqrt() ) ).exp() ]
 ```
 '''
     ),
-    html.Label('Change values of sampling step h: o ------------------ o'),
-    dcc.RangeSlider(
-        id='sli_h_b', value=[0.15, 0.2], min=0.1, max=0.3, step=0.02, updatemode='drag',
-        className='sli_h'
+    html.Div([
+        html.Label('Change values of sampling step h: o ------------------ o'),
+        dcc.RangeSlider(
+            id='sli_h_b', value=[0.15, 0.2], min=0.1, max=0.3, step=0.01, updatemode='drag',
+            className='sli_h')
+        ],
+        style={'width':600, 'padding':10}
     ),
     dcc.Graph(
         id='grf_exp1',
@@ -138,20 +180,28 @@ for h in h_b:
     ),
     dcc.Markdown(children='''\
 ---
-Neutralizing negative delay operator
+Neutralizing negative delay operator we get regular function for $t ≥ 0$
+ (see the last part of [Mikusinski's remarks about negative delay operator](http://www.pei.prz.edu.pl/~kubaszek/smacd06/JM_OperCalc.html)):
+
+{*x_b(t)*} = *p* · {1} · (1 / (*p*² + *p* + 4) exp( -(-T₀)√(*p*² +1) ) · exp(-T₀  p)
+
+T₀ = 0.04
 
 ```python
 x_b0 = []
 for h in h_b:
     p = 1/h * p_tr
-    x_b0 += [ p * f_1111 * 1 / (p**2 + p + 4) * ( -(-T_0) * ( (p**2 +1).sqrt() ) ).exp() * (-T_0*p).exp() ]
+    x_b0 += [ p * f_1111 * 1 / (p² + p + 4) * ( -(-T_0) * ( (p**2 +1).sqrt() ) ).exp() * (-T_0*p).exp() ]
 ```
 '''
     ),
-    html.Label('Change values of sampling step h: o ------------------ o'),
-    dcc.RangeSlider(
-        id='sli_h_b0', value=[0.15, 0.2], min=0.1, max=0.3, step=0.02, updatemode='drag',
-        className='sli_h'
+    html.Div([
+        html.Label('Change values of sampling step h: o ------------------ o'),
+        dcc.RangeSlider(
+            id='sli_h_b0', value=[0.15, 0.2], min=0.1, max=0.3, step=0.01, 
+            updatemode='drag', className='sli_h')
+        ],
+        style={'width':600, 'padding':10}
     ),
     dcc.Graph(
         id='grf_exp1zero',
@@ -161,8 +211,7 @@ for h in h_b:
         }
     )
 ], 
-className="container",
-style={'width':700}
+className="container"
 )
 
 @app.callback(Output('grf2_44_44', 'figure'),
