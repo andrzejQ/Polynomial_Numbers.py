@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import dash
+import dash  # http://localhost:8050/ #interactive graphs like 04.PN...ipynb, but without mathJax
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
@@ -234,3 +234,4 @@ def data_analysis_x_b0(new_slider_values):
 
 if __name__ == '__main__':
     app.run_server()
+#√·∫≠≤≥ ⁰¹²³⁴⁵⁶⁸⁹⁺⁻ⁱⁿ⁽⁾ ₀₁₂₃₄₆₇₈₉₊₋₌₎ₐₑₒ ¼½ δ
