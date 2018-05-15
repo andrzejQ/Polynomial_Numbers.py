@@ -2,6 +2,7 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+from dash.dependencies import Input, Output
 
 from PNlib import PolyNumConf
 PolyNumConf.max_N=32 # PN significant digits number (restart jupyter kernel on change)
@@ -11,11 +12,6 @@ from PNlib.PolyNum import PolyNum
 f_1111 = 0.5 * PolyNum('const:(~1~,2~2~2~2~...~)')
 p_tr = PolyNum('const:(~2~,-4~4~-4~4~...~)') # 2*(~1~-1~)/(~1~1~)
 
-h_a = [0.4,0.8] # diffrent sampling periods for graphs
-x_a = []
-for h in h_a:  # diffrent sampling periods
-    p = 1/h * p_tr
-    x_a += [ p * f_1111 * p ]
     
 h_b = [0.15,0.2] # diffrent sampling periods for graphs
 x_b = []
@@ -37,29 +33,39 @@ style = [{"line": {"color": "rgba (255, 0, 0, 1)", "dash": "6px,3px", "width": 0
     {"line": {"color": "rgba (0, 0, 255, 1)", "dash": "solid", "width": 0.8}, 
     "marker": {"color": "#0000FF", "size": 6.0, "symbol": "diamond"}, "mode": "lines+markers"
     }]
-    
-traces_a = []
-for n, h in enumerate(h_a):  # diffrent sampling periods
-    traces_a += [go.Scatter( y=list(x_a[n]), x0=0, dx=h, name='h='+str(h), **style[n] )]
+
+app = dash.Dash()
+
 layout_a = go.Layout(autosize=False, width=800, height=220,
-    margin=go.Margin(l=50, r=50, b=20, t=20, pad=4),
-    yaxis=dict(range=[-35, 35]), xaxis=dict(title='t')
+    margin=go.Margin(l=50, r=50, b=40, t=20, pad=4),
+    yaxis=dict(range=[-35, 35]), xaxis=dict(title='t',range=[0, 25])
 )
+
+def your_compute_figure_function(h_1): # h_1 = new_slider_value
+    h_a = [0.4,h_1] # diffrent sampling periods for graphs
+    x_a = []
+    for h in h_a:  # diffrent sampling periods
+        p = 1/h * p_tr
+        x_a += [ p * f_1111 * p ]
+    traces_a = []
+    for n, h in enumerate(h_a):  # diffrent sampling periods
+        traces_a += [go.Scatter( y=list(x_a[n]), x0=0, dx=h, name='h='+str(h), **style[n] )]
+    new_figure_a={'data': go.Data(traces_a), 'layout': layout_a}
+    return new_figure_a
 
 traces_b = []
 for n, h in enumerate(h_b):  # diffrent sampling periods
     traces_b += [go.Scatter( y=list(x_b[n]), x0=0, dx=h, name='h='+str(h), **style[n] )]
+
 layout_b = go.Layout(autosize=False, width=800, height=300,
-    margin=go.Margin(l=50, r=50, b=30, t=20, pad=4),
-    yaxis=dict(range=[-0.5, 0.5]), xaxis=dict(title='t')
+    margin=go.Margin(l=50, r=50, b=40, t=20, pad=4),
+    yaxis=dict(range=[-0.5, 0.5]), xaxis=dict(title='t',range=[0, 6.6])
 )
 
 traces_b0 = []
 for n, h in enumerate(h_b):  # diffrent sampling periods
     traces_b0 += [go.Scatter( y=list(x_b0[n]), x0=0, dx=h, name='h='+str(h), **style[n] )]
     
-app = dash.Dash()
-
 app.layout = html.Div([
     dcc.Markdown(children='''\
 # Discrete representations of generalized time domain functions
@@ -90,12 +96,11 @@ for h in h_a:  # diffrent sampling periods
 ```
 '''
     ),
+    html.Label('h_1'),
+    dcc.Slider(id='sli_h', value=0.8, min=0.3, max=0.9, step=0.1),
     dcc.Graph(
-        id='2_44_44',
-        figure={
-            'data': go.Data(traces_a),
-            'layout': layout_a
-        }
+        id='grf2_44_44',
+        figure=your_compute_figure_function(0.7)
     ),
     dcc.Markdown(children='''\
 ---
@@ -112,7 +117,7 @@ for h in h_b:
 '''
     ),
     dcc.Graph(
-        id='exp1',
+        id='grf_exp1',
         figure={
             'data': go.Data(traces_b),
             'layout': layout_b
@@ -131,7 +136,7 @@ for h in h_b:
 '''
     ),
     dcc.Graph(
-        id='exp1zero',
+        id='grf_exp1zero',
         figure={
             'data': go.Data(traces_b0),
             'layout': layout_b
@@ -139,6 +144,11 @@ for h in h_b:
     )
 ])
 
+@app.callback(Output('grf2_44_44', 'figure'),
+             [Input('sli_h', 'value')])
+def your_data_analysis_function(new_slider_value):
+    new_figure = your_compute_figure_function(new_slider_value)
+    return new_figure
 
 if __name__ == '__main__':
     app.run_server()
