@@ -51,7 +51,7 @@ x_b0_.layout_ = layout_b
 
 def compute_fig_(h_0, h_1, x_p): # arg: new_slider_value, x_p = f(p)
     '''Compute x_a[ , ] only for changed h_0 or h_1'''
-    figures_a = getattr(x_p, "_figures", None)
+    figures_ = getattr(x_p, "_figures", None)
     h_a = [ getattr(x_p, "_h0", None), getattr(x_p, "_h1", None) ]
     
     h_a_old = h_a
@@ -65,20 +65,20 @@ def compute_fig_(h_0, h_1, x_p): # arg: new_slider_value, x_p = f(p)
             p = 1/h * p_tr
             x_a += [ x_p(p) ]
             ##################################
-    if figures_a is None:
+    if figures_ is None:
         traces_a = []
         for n, h in enumerate(h_a):  # diffrent sampling periods
             traces_a += [go.Scatter( y=list(x_a[n]), x0=0, dx=h, name='h='+str(h), **style[n] )]
-        figures_a={'data': go.Data(traces_a), 'layout': getattr(x_p, "layout_", None)}
+        figures_={'data': go.Data(traces_a), 'layout': getattr(x_p, "layout_", None)}
     else: #only update y,x data for changed h
         for n, x_ in enumerate(x_a):
             if x_:
                 h = h_a[n]
-                figures_a['data'][n].update( y=list(x_), x=[k*h for k in range(len(x_))] )
-    x_p._figures = figures_a
+                figures_['data'][n].update( y=list(x_), x=[k*h for k in range(len(x_))] )
+    x_p._figures = figures_
     x_p._h0 = h_a[0]
     x_p._h1 = h_a[1]
-    return figures_a
+    return figures_
 
     
 def compute_fig_xy_d(a, h): # arg: sliders values
