@@ -78,11 +78,27 @@ def compute_fig_(h_0, h_1, x_p): # arg: new_slider_value, x_p = f(p)
     x_p._h1 = h_01[1]
     return figures_
 
+
+def blackBox1(p):
+    return 1 / (p**2 + p + 4)
+blackBox1.yaxisRange = [-3.1, 2.1]
+
+def x_d(a, p):
+    return f_1111 * p**(a+1)
+x_d.yaxisRange = [-100000, 100000]
     
-def compute_fig_xy_d(a, h): # arg: sliders values
+def blackBox2(p_):
+    return 1 / (p_**2 + p_ + 4) * ( -0.5 * ( (p_**2 +1).sqrt() ) ).exp()
+blackBox2.yaxisRange = [-0.31, 0.41]
+
+def x_e(b, p_):
+    return p_ * f_1111 * (b*p_).exp()
+x_e.yaxisRange = [-300e12, 200e12]
+    
+def compute_fig_xy_(a, h, x_p_, blackBox_): # arg: sliders values, x_p_(a, p), blackBox_(p)
     p = 1/h * p_tr
-    blackBox1 = 1 / (p**2 + p + 4)
-    x_ =  f_1111 * p**(a+1)
+    blackBox1 = blackBox_(p)
+    x_ =  x_p_(a, p)
     trace_d_x = go.Scatter( y=list(x_), x0=0, dx=h, name='inp.', **style[0])
     y_ = x_ * blackBox1
     trace_d_y = go.Scatter( y=list(y_), x0=0, dx=h, name='out.', **style[1])
@@ -93,26 +109,8 @@ def compute_fig_xy_d(a, h): # arg: sliders values
     fig['layout'].update(height=500, width=700)
     fig['layout']['xaxis1'].update(range=[0, 4.3], title='t')
     #fig['layout']['xaxis2'].update(range=[0, 4.3], title='t')
-    fig['layout']['yaxis1'].update(range=[-100000, 100000], title='x(t)')
-    fig['layout']['yaxis2'].update(range=[-3.1, 2.1], title='y(t)')
-    return fig
-
-def compute_fig_xy_e(b, h): # arg: sliders values
-    p_ = 1/h * p_tr
-    blackBox2 =  1 / (p_**2 + p_ + 4) * ( -0.5 * ( (p_**2 +1).sqrt() ) ).exp()
-    x_ =  p_ * f_1111 * (b*p_).exp()
-    trace_e_x = go.Scatter( y=list(x_), x0=0, dx=h, name='inp.', **style[0])
-    y_ = x_ * blackBox2
-    trace_e_y = go.Scatter( y=list(y_), x0=0, dx=h, name='out.', **style[1])
-    
-    fig = tools.make_subplots(rows=2, cols=1, shared_xaxes=True)
-    fig.append_trace(trace_e_x, 1, 1)
-    fig.append_trace(trace_e_y, 2, 1)
-    fig['layout'].update(height=500, width=700)
-    fig['layout']['xaxis1'].update(range=[0, 4.3], title='t')
-    #fig['layout']['xaxis2'].update(range=[0, 4.3], title='t')
-    fig['layout']['yaxis1'].update(range=[-300e12, 200e12], title='x(t)')
-    fig['layout']['yaxis2'].update(range=[-0.31, 0.41], title='y(t)')
+    fig['layout']['yaxis1'].update(range=x_p_.yaxisRange, title='x(t)')
+    fig['layout']['yaxis2'].update(range=blackBox_.yaxisRange, title='y(t)')
     return fig
 
 ######################################################
@@ -303,7 +301,7 @@ y_ = x_ * blackBox1
     ], style={'width':600, 'paddingLeft':10}),
     dcc.Graph(
         id='grf_d',
-        figure=compute_fig_xy_d(2.0, 0.15)
+        figure=compute_fig_xy_(2.0, 0.15, x_d, blackBox1)
     ),
     dcc.Markdown(children=r'''
 Although *x(t)* is "unrealistic function" ( (a+1)  - derivative of the step function), it samples can be generated and applied into input of black box. For *a* ≤ 2.0 output of black box gives samples of "realistic function" *y(t)*, that means - smaller *h* leads to  more accurate *y(t)*. For *a* > 2.0 output is not convergent with decreasing *h*.
@@ -346,7 +344,7 @@ y_ = x_ * blackBox2
     ], style={'width':600, 'paddingLeft':10}),
     dcc.Graph(
         id='grf_e',
-        figure=compute_fig_xy_e(0.5, 0.15)
+        figure=compute_fig_xy_(0.5, 0.15, x_e, blackBox2)
     ),
     dcc.Markdown(children=r'''
 Although *x(t)* is "unrealistic function" (pure delay operator with negative delay), it samples can be generated and applied into input of black box. For *b* ≤ 0.5 output of black box gives samples of "realistic function" *y(t)*, that means - smaller *h* leads to  more accurate *y(t)*. For *b* > 0.5 output is not convergent with decreasing *h*.
@@ -393,7 +391,7 @@ def update_output_sli_a(h):
 @app.callback(Output('grf_d', 'figure'),
              [Input('sli_aa', 'value'), Input('sli_h_d', 'value')])
 def data_analysis_xy_d(a, h):
-    new_figure = compute_fig_xy_d(a, h)
+    new_figure = compute_fig_xy_(a, h, x_d, blackBox1)
     return new_figure
 
 
@@ -410,7 +408,7 @@ def update_output_sli_a(h):
 @app.callback(Output('grf_e', 'figure'),
              [Input('sli_bb', 'value'), Input('sli_h_e', 'value')])
 def data_analysis_xy_e(b, h):
-    new_figure = compute_fig_xy_e(b, h)
+    new_figure = compute_fig_xy_(b, h, x_e, blackBox2)
     return new_figure
 
 
