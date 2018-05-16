@@ -111,6 +111,11 @@ def compute_fig_xy_e(b, h): # arg: sliders values
 
 app.layout = html.Div([
     dcc.Markdown(children=r'''
+    
+[ Andrzej Kubaszek, Rzeszow University of Technology, 2018](http://www.pei.prz.edu.pl/%7Ekubaszek/index_en.html)
+
+Floating point arithmetic for 'numbers' with digits such as real numbers, can be used to solve differential or difference equations using Mikusinski's or Bellert's operational calculus theory.
+
 # Discrete representations of generalized time domain functions
 
 ## Laplace transform
@@ -330,8 +335,11 @@ y_ = x_ * blackBox2
     dcc.Markdown(children=r'''
 Although *x(t)* is "unrealistic function" (pure delay operator with negative delay), it samples can be generated and applied into input of black box. For *b* ≤ 0.5 output of black box gives samples of "realistic function" *y(t)*, that means - smaller *h* leads to  more accurate *y(t)*. For *b* > 0.5 output is not convergent with decreasing *h*.
 
-* [PN on GitHub](https://github.com/andrzejQ/Polynomial_Numbers.py)
-* [PN www](http://www.pei.prz.edu.pl/%7Ekubaszek/index_en.html)
+* [PNlib on GitHub (Python library)](https://github.com/andrzejQ/Polynomial_Numbers.py)
+* [jupyter notebooks index (nbviewer, GitHub)](index.ipynb)
+* [mybinder - jupyter notebooks index (live)](https://mybinder.org/v2/gh/andrzejQ/Polynomial_Numbers.py.git/master?filepath=index.ipynb)
+* [html - www.pei.prz.edu.pl/~kubaszek](http://www.pei.prz.edu.pl/%7Ekubaszek/index_en.html)
+
 ''' )
 ], style={'padding':30}, className="container"
 )
