@@ -116,6 +116,8 @@ app.layout = html.Div([
 
 Floating point arithmetic for 'numbers' with digits such as real numbers, can be used to solve differential or difference equations using Mikusinski's or Bellert's operational calculus theory.
 
+*( This page was build with [plot.ly dash](https://plot.ly/products/dash/) )*
+
 # Discrete representations of generalized time domain functions
 
 ## Laplace transform
