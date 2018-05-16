@@ -50,34 +50,32 @@ def x_b0_(p):
 x_b0_.layout_ = layout_b
 
 def compute_fig_(h_0, h_1, x_p): # arg: new_slider_value, x_p = f(p)
-    '''Compute x_a[ , ] only for changed h_0 or h_1'''
+    '''Compute x_01[ , ] only for changed h_0 or h_1'''
     figures_ = getattr(x_p, "_figures", None)
-    h_a = [ getattr(x_p, "_h0", None), getattr(x_p, "_h1", None) ]
-    
-    h_a_old = h_a
-    h_a = [h_0,h_1] # 2 diffrent sampling periods for graphs
-    x_a = []
-    for n, h in enumerate(h_a):  # diffrent sampling periods
-        if h == h_a_old[n]:
-            x_a += [None]
+    h_01 = [ getattr(x_p, "_h0", None), getattr(x_p, "_h1", None) ]
+    h_old, h_01 = h_01, [h_0,h_1] # 2 diffrent sampling periods for graphs
+    x_01 = []
+    for n, h in enumerate(h_01):  # diffrent sampling periods
+        if h == h_old[n]:
+            x_01 += [None]
         else:
             ##################################
             p = 1/h * p_tr
-            x_a += [ x_p(p) ]
+            x_01 += [ x_p(p) ]
             ##################################
     if figures_ is None:
-        traces_a = []
-        for n, h in enumerate(h_a):  # diffrent sampling periods
-            traces_a += [go.Scatter( y=list(x_a[n]), x0=0, dx=h, name='h='+str(h), **style[n] )]
-        figures_={'data': go.Data(traces_a), 'layout': getattr(x_p, "layout_", None)}
+        traces_01 = []
+        for n, h in enumerate(h_01):  # diffrent sampling periods
+            traces_01 += [go.Scatter( y=list(x_01[n]), x0=0, dx=h, name='h='+str(h), **style[n] )]
+        figures_={'data': go.Data(traces_01), 'layout': getattr(x_p, "layout_", None)}
     else: #only update y,x data for changed h
-        for n, x_ in enumerate(x_a):
+        for n, x_ in enumerate(x_01):
             if x_:
-                h = h_a[n]
+                h = h_01[n]
                 figures_['data'][n].update( y=list(x_), x=[k*h for k in range(len(x_))] )
     x_p._figures = figures_
-    x_p._h0 = h_a[0]
-    x_p._h1 = h_a[1]
+    x_p._h0 = h_01[0]
+    x_p._h1 = h_01[1]
     return figures_
 
     
