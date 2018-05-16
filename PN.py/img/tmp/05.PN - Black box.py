@@ -12,6 +12,8 @@ get_ipython().run_line_magic('matplotlib', 'notebook')
 
 
 # Interactive options of this notebook are not working in GitHub nbviewer (but static version of graph can be viewed). You can run it in full Jupyter notebook environment - [go to live mybind version](https://mybinder.org/v2/gh/andrzejQ/Polynomial_Numbers.py.git/master?filepath=PN.py/05.PN%20-%20Black%20box.ipynb)
+# _ _ or _ _
+# [dash webapp on heroku.com](https://pn-04h-lapl-z.herokuapp.com/) .
 
 # If you have already read [04. PN generalized time domain functions](04.PN generalized time domain functions.ipynb) skip introduction and goto to [Derivative of the step function ...](#Derivative-of-the-step-function-on-input-of-black-box)
 

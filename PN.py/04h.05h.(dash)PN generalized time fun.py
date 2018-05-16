@@ -124,7 +124,7 @@ The functions of continuous time defined for *t* ≥ 0, can be expressed in **Mi
 where *X(p)* denote **Laplace transform** formulas: 
 '''
     ),
-    html.Img(src="http://www.pei.prz.edu.pl/~kubaszek/smacd06/LaplZPNbig.png", alt="LaplZ_PN_", style={'float':"right", 'width':"350px"} ),
+    html.Img(src="https://pei.prz.edu.pl/~kubaszek/smacd06/LaplZPNbig.png", alt="LaplZ_PN_", style={'float':"right", 'width':"30em"} ),
     dcc.Markdown(children=r'''
 { *x(t)* } = *X(p)* · *p* · {1}
 
@@ -318,9 +318,9 @@ y_ = x_ * blackBox2
         html.Div([
             html.Label('Negative delay:'),
             dcc.Slider(
-                id='sli_bb', value=0.5, min=-1.0, max=1.0, step=0.02
+                id='sli_bb', value=0.5, min=-1.0, max=0.6, step=0.02
                 , updatemode='drag', className='sli_h'
-                , marks={0:'0', 1:'1',0.5:{'label':'0.5', 'style':{'color':'red'}}} ),
+                , marks={0:'0', 0.6:'0.6',0.5:{'label':'0.5', 'style':{'color':'red'}}} ),
             html.Div('b=',id='slider-output-bb'),
         ], style={'padding':'0 10px', 'width': '44%', 'display': 'inline-block'}),
         html.Div([
