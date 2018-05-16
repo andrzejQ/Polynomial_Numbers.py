@@ -36,17 +36,32 @@ layout_b = go.Layout(autosize=False, width=700, height=300,
 f_1111 = 0.5 * PolyNum('const:(~1~,2~2~2~2~...~)')
 p_tr = PolyNum('const:(~2~,-4~4~-4~4~...~)') # 2*(~1~-1~)/(~1~1~)
 
+figures_a = None
+h_a = [None, None]
+
 def compute_fig_x_a(h_0, h_1): # arg: new_slider_value
+    '''Compute x_a[ , ] only for changed h_0 or h_1'''
+    global figures_a, h_a
+    h_a_old = h_a
     h_a = [h_0,h_1] # 2 diffrent sampling periods for graphs
     x_a = []
-    for h in h_a:  # diffrent sampling periods
-        p = 1/h * p_tr
-        x_a += [ p * f_1111 * p ]
-    traces_a = []
     for n, h in enumerate(h_a):  # diffrent sampling periods
-        traces_a += [go.Scatter( y=list(x_a[n]), x0=0, dx=h, name='h='+str(h), **style[n] )]
-    new_figure_a={'data': go.Data(traces_a), 'layout': layout_a}
-    return new_figure_a
+        if h == h_a_old[n]:
+            x_a += [None]
+        else:
+            p = 1/h * p_tr
+            x_a += [ p * f_1111 * p ]
+    if figures_a is None:
+        traces_a = []
+        for n, h in enumerate(h_a):  # diffrent sampling periods
+            traces_a += [go.Scatter( y=list(x_a[n]), x0=0, dx=h, name='h='+str(h), **style[n] )]
+            figures_a={'data': go.Data(traces_a), 'layout': layout_a}
+    else: #only update y,x data i h was changed 
+        for n, x_ in enumerate(x_a):
+            if x_:
+                h = h_a[n]
+                figures_a['data'][n].update( y=list(x_), x=[k*h for k in range(len(x_))] )
+    return figures_a
 
 T_0 = 0.04
     
