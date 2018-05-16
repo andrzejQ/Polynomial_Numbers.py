@@ -96,8 +96,13 @@ def x_e(b, p_):
 x_e.yaxisRange = [-300e12, 200e12]
     
 def compute_fig_xy_(a, h, x_p_, blackBox_): # arg: sliders values, x_p_(a, p), blackBox_(p)
+    fig = getattr(x_p_, "_figures", None)
+    h_old = getattr(x_p_, "_h", None)
+    blackBox1 = getattr(x_p_, "blackBox_", None)
+
     p = 1/h * p_tr
-    blackBox1 = blackBox_(p)
+    if (blackBox1 is None) or (h_old != h):
+        blackBox1 = blackBox_(p) #else skip calc. for spead up
     x_ =  x_p_(a, p)
     trace___x = go.Scatter( y=list(x_), x0=0, dx=h, name='inp.', **style[0])
     y_ = x_ * blackBox1
@@ -111,6 +116,8 @@ def compute_fig_xy_(a, h, x_p_, blackBox_): # arg: sliders values, x_p_(a, p), b
     #fig['layout']['xaxis2'].update(range=[0, 4.3], title='t')
     fig['layout']['yaxis1'].update(range=x_p_.yaxisRange, title='x(t)')
     fig['layout']['yaxis2'].update(range=blackBox_.yaxisRange, title='y(t)')
+    x_p_._figures = fig
+    x_p_._h = h
     return fig
 
 ######################################################
