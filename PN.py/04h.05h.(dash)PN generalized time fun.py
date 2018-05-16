@@ -98,24 +98,28 @@ x_e.yaxisRange = [-300e12, 200e12]
 def compute_fig_xy_(a, h, x_p_, blackBox_): # arg: sliders values, x_p_(a, p), blackBox_(p)
     fig = getattr(x_p_, "_figures", None)
     h_old = getattr(x_p_, "_h", None)
-    blackBox1 = getattr(x_p_, "blackBox_", None)
+    blackBox = getattr(x_p_, "blackBox_", None)
 
     p = 1/h * p_tr
-    if (blackBox1 is None) or (h_old != h):
-        blackBox1 = blackBox_(p) #else skip calc. for spead up
+    if (blackBox is None) or (h_old != h):
+        blackBox = blackBox_(p) #else skip calc. for spead up
     x_ =  x_p_(a, p)
-    trace___x = go.Scatter( y=list(x_), x0=0, dx=h, name='inp.', **style[0])
-    y_ = x_ * blackBox1
-    trace___y = go.Scatter( y=list(y_), x0=0, dx=h, name='out.', **style[1])
+    y_ = x_ * blackBox
     
-    fig = tools.make_subplots(rows=2, cols=1, shared_xaxes=True)
-    fig.append_trace(trace___x, 1, 1)
-    fig.append_trace(trace___y, 2, 1)
-    fig['layout'].update(height=500, width=700)
-    fig['layout']['xaxis1'].update(range=[0, 4.3], title='t')
-    #fig['layout']['xaxis2'].update(range=[0, 4.3], title='t')
-    fig['layout']['yaxis1'].update(range=x_p_.yaxisRange, title='x(t)')
-    fig['layout']['yaxis2'].update(range=blackBox_.yaxisRange, title='y(t)')
+    if fig is None:
+        trace___x = go.Scatter( y=list(x_), x0=0, dx=h, name='inp.', **style[0])
+        trace___y = go.Scatter( y=list(y_), x0=0, dx=h, name='out.', **style[1])
+        fig = tools.make_subplots(rows=2, cols=1, shared_xaxes=True)
+        fig.append_trace(trace___x, 1, 1)
+        fig.append_trace(trace___y, 2, 1)
+        fig['layout'].update(height=500, width=700)
+        fig['layout']['xaxis1'].update(range=[0, 4.3], title='t')
+        #fig['layout']['xaxis2'].update(range=[0, 4.3], title='t')
+        fig['layout']['yaxis1'].update(range=x_p_.yaxisRange, title='x(t)')
+        fig['layout']['yaxis2'].update(range=blackBox_.yaxisRange, title='y(t)')
+    else:
+        fig['data'][0].update( y=list(x_), x0=0, dx=h )
+        fig['data'][1].update( y=list(y_), x0=0, dx=h )
     x_p_._figures = fig
     x_p_._h = h
     return fig
