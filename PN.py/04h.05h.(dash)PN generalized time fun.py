@@ -36,12 +36,24 @@ layout_b = go.Layout(autosize=False, width=700, height=300,
 f_1111 = 0.5 * PolyNum('const:(~1~,2~2~2~2~...~)')
 p_tr = PolyNum('const:(~2~,-4~4~-4~4~...~)') # 2*(~1~-1~)/(~1~1~)
 
-figures_a = None
-h_a = [None, None]
+def x_a_(p):
+    return p * f_1111 * p
+x_a_.layout_ = layout_a
 
-def compute_fig_x_a(h_0, h_1): # arg: new_slider_value
+T_0 = 0.04
+def x_b_(p):
+    return p * f_1111 * 1 / (p**2 + p + 4) * ( -(-T_0) * ( (p**2 +1).sqrt() ) ).exp()
+x_b_.layout_ = layout_b
+
+def x_b0_(p):
+    return p * f_1111 * 1 / (p**2 + p + 4) * ( -(-T_0) * ( (p**2 +1).sqrt() ) ).exp() * (-T_0*p).exp()
+x_b0_.layout_ = layout_b
+
+def compute_fig_(h_0, h_1, x_p): # arg: new_slider_value, x_p = f(p)
     '''Compute x_a[ , ] only for changed h_0 or h_1'''
-    global figures_a, h_a
+    figures_a = getattr(x_p, "_figures", None)
+    h_a = [ getattr(x_p, "_h0", None), getattr(x_p, "_h1", None) ]
+    
     h_a_old = h_a
     h_a = [h_0,h_1] # 2 diffrent sampling periods for graphs
     x_a = []
@@ -51,61 +63,23 @@ def compute_fig_x_a(h_0, h_1): # arg: new_slider_value
         else:
             ##################################
             p = 1/h * p_tr
-            x_a += [ p * f_1111 * p ]
+            x_a += [ x_p(p) ]
             ##################################
     if figures_a is None:
         traces_a = []
         for n, h in enumerate(h_a):  # diffrent sampling periods
             traces_a += [go.Scatter( y=list(x_a[n]), x0=0, dx=h, name='h='+str(h), **style[n] )]
-        figures_a={'data': go.Data(traces_a), 'layout': layout_a}
+        figures_a={'data': go.Data(traces_a), 'layout': getattr(x_p, "layout_", None)}
     else: #only update y,x data for changed h
         for n, x_ in enumerate(x_a):
             if x_:
                 h = h_a[n]
                 figures_a['data'][n].update( y=list(x_), x=[k*h for k in range(len(x_))] )
+    x_p._figures = figures_a
+    x_p._h0 = h_a[0]
+    x_p._h1 = h_a[1]
     return figures_a
 
-T_0 = 0.04
-figures_b = None
-h_b = [None, None]
-    
-def compute_fig_x_b(h_0, h_1): # arg: new_slider_value
-    '''Compute x_b[ , ] only for changed h_0 or h_1'''
-    global figures_b, h_b
-    h_b_old = h_b
-    h_b = [h_0,h_1] # 2 diffrent sampling periods for graphs
-    x_b = []
-    for n, h in enumerate(h_b):  # diffrent sampling periods
-        if h == h_b_old[n]:
-            x_b += [None]
-        else:
-            ##################################
-            p = 1/h * p_tr
-            x_b += [ p * f_1111 * 1 / (p**2 + p + 4) * ( -(-T_0) * ( (p**2 +1).sqrt() ) ).exp() ]
-            ##################################
-    if figures_b is None:
-        traces_b = []
-        for n, h in enumerate(h_b):  # diffrent sampling periods
-            traces_b += [go.Scatter( y=list(x_b[n]), x0=0, dx=h, name='h='+str(h), **style[n] )]
-        figures_b={'data': go.Data(traces_b), 'layout': layout_b}
-    else: #only update y,x data for changed h
-        for n, x_ in enumerate(x_b):
-            if x_:
-                h = h_b[n]
-                figures_b['data'][n].update( y=list(x_), x=[k*h for k in range(len(x_))] )
-    return figures_b
-
-def compute_fig_x_b0(h_0, h_1): # arg: new_slider_value
-    h_b0 = [h_0,h_1] # 2 diffrent sampling periods for graphs
-    x_b0 = []
-    for h in h_b0:
-        p = 1/h * p_tr
-        x_b0 += [ p * f_1111 * 1 / (p**2 + p + 4) * ( -(-T_0) * ( (p**2 +1).sqrt() ) ).exp() * (-T_0*p).exp() ]
-    traces_b0 = []
-    for n, h in enumerate(h_b0):  # diffrent sampling periods
-        traces_b0 += [go.Scatter( y=list(x_b0[n]), x0=0, dx=h, name='h='+str(h), **style[n] )]
-    new_figure_b0={'data': go.Data(traces_b0), 'layout': layout_b}
-    return new_figure_b0
     
 def compute_fig_xy_d(a, h): # arg: sliders values
     p = 1/h * p_tr
@@ -226,7 +200,10 @@ x_a = p * f_1111 * p
     ),
     dcc.Graph(
         id='grf2_44_44',
-        figure=compute_fig_x_a(0.5, 0.7)
+        figure={
+            'data': compute_fig_(0.5, 0.7, x_a_),
+            'layout': getattr(x_a_, "layout_", None)
+        }
     ),
     dcc.Markdown(children=r'''
 ---
@@ -254,8 +231,8 @@ x_b = p * f_1111 * 1 / (p**2 + p + 4) * ( -(-T_0) * ( (p**2 +1).sqrt() ) ).exp()
     dcc.Graph(
         id='grf_exp1',
         figure={
-            'data': compute_fig_x_b(0.1, 0.2),
-            'layout': layout_b
+            'data': compute_fig_(0.1, 0.2, x_b_),
+            'layout': getattr(x_b_, "layout_", None)
         }
     ),
     dcc.Markdown(children=r'''
@@ -284,8 +261,8 @@ x_b0 = p * f_1111 * 1 / (p**2 + p + 4) * ( -(-T_0) * ( (p**2 +1).sqrt() ) ).exp(
     dcc.Graph(
         id='grf_exp1zero',
         figure={
-            'data': compute_fig_x_b0(0.1, 0.2),
-            'layout': layout_b
+            'data': compute_fig_(0.1, 0.2, x_b0_),
+            'layout': getattr(x_b0_, "layout_", None)
         }
     ),
     dcc.Markdown(children=r'''
@@ -390,19 +367,19 @@ Although *x(t)* is "unrealistic function" (pure delay operator with negative del
 @app.callback(Output('grf2_44_44', 'figure'),
              [Input('sli_h_a', 'value')])
 def data_analysis_x_a(new_slider_values):
-    new_figure = compute_fig_x_a(*new_slider_values)
+    new_figure = compute_fig_(*new_slider_values, x_a_)
     return new_figure
 
 @app.callback(Output('grf_exp1', 'figure'),
              [Input('sli_h_b', 'value')])
 def data_analysis_x_b(new_slider_values):
-    new_figure = compute_fig_x_b(*new_slider_values)
+    new_figure = compute_fig_(*new_slider_values, x_b_)
     return new_figure
 
 @app.callback(Output('grf_exp1zero', 'figure'),
              [Input('sli_h_b0', 'value')])
 def data_analysis_x_b0(new_slider_values):
-    new_figure = compute_fig_x_b0(*new_slider_values)
+    new_figure = compute_fig_(*new_slider_values, x_b0_)
     return new_figure
 
 @app.callback(Output('slider-output-aa', 'children'),
