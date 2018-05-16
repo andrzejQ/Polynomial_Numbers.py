@@ -8,10 +8,6 @@ from PNlib import PolyNumConf
 PolyNumConf.max_N=32 # PN significant digits number (restart jupyter kernel on change)
 from PNlib.PolyNum import PolyNum
 
-# Z-transform (live example):
-f_1111 = 0.5 * PolyNum('const:(~1~,2~2~2~2~...~)')
-p_tr = PolyNum('const:(~2~,-4~4~-4~4~...~)') # 2*(~1~-1~)/(~1~1~)
-
 from plotly import tools
 import plotly.plotly as py
 import plotly.graph_objs as go
@@ -33,8 +29,12 @@ layout_b = go.Layout(autosize=False, width=700, height=300,
     yaxis=dict(range=[-0.5, 0.5]), xaxis=dict(title='t',range=[0, 6.6])
 )
 
+# Z-transform (live example):
+f_1111 = 0.5 * PolyNum('const:(~1~,2~2~2~2~...~)')
+p_tr = PolyNum('const:(~2~,-4~4~-4~4~...~)') # 2*(~1~-1~)/(~1~1~)
+
 def compute_fig_x_a(h_0, h_1): # arg: new_slider_value
-    h_a = [h_0,h_1] # diffrent sampling periods for graphs
+    h_a = [h_0,h_1] # 2 diffrent sampling periods for graphs
     x_a = []
     for h in h_a:  # diffrent sampling periods
         p = 1/h * p_tr
@@ -48,7 +48,7 @@ def compute_fig_x_a(h_0, h_1): # arg: new_slider_value
 T_0 = 0.04
     
 def compute_fig_x_b(h_0, h_1): # arg: new_slider_value
-    h_b = [h_0,h_1] # diffrent sampling periods for graphs
+    h_b = [h_0,h_1] # 2 diffrent sampling periods for graphs
     x_b = []
     for h in h_b:
         p = 1/h * p_tr
@@ -60,7 +60,7 @@ def compute_fig_x_b(h_0, h_1): # arg: new_slider_value
     return new_figure_b
     
 def compute_fig_x_b0(h_0, h_1): # arg: new_slider_value
-    h_b0 = [h_0,h_1] # diffrent sampling periods for graphs
+    h_b0 = [h_0,h_1] # 2 diffrent sampling periods for graphs
     x_b0 = []
     for h in h_b0:
         p = 1/h * p_tr
@@ -71,7 +71,7 @@ def compute_fig_x_b0(h_0, h_1): # arg: new_slider_value
     new_figure_b0={'data': go.Data(traces_b0), 'layout': layout_b}
     return new_figure_b0
     
-def compute_fig_xy_d(a, h): # arg: slider value
+def compute_fig_xy_d(a, h): # arg: sliders values
     p = 1/h * p_tr
     blackBox1 = 1 / (p**2 + p + 4)
     x_ =  f_1111 * p**(a+1)
@@ -84,11 +84,31 @@ def compute_fig_xy_d(a, h): # arg: slider value
     fig.append_trace(trace_d_y, 2, 1)
     fig['layout'].update(height=500, width=700)
     fig['layout']['xaxis1'].update(range=[0, 4.3], title='t')
-    fig['layout']['xaxis2'].update(range=[0, 4.3], title='t')
+    #fig['layout']['xaxis2'].update(range=[0, 4.3], title='t')
     fig['layout']['yaxis1'].update(range=[-100000, 100000], title='x(t)')
-    fig['layout']['yaxis2'].update(range=[-3.0, 2.0], title='y(t)')
+    fig['layout']['yaxis2'].update(range=[-3.1, 2.1], title='y(t)')
     return fig
+
+def compute_fig_xy_e(b, h): # arg: sliders values
+    p_ = 1/h * p_tr
+    blackBox2 =  1 / (p_**2 + p_ + 4) * ( -0.5 * ( (p_**2 +1).sqrt() ) ).exp()
+    x_ =  p_ * f_1111 * (b*p_).exp()
+    trace_e_x = go.Scatter( y=list(x_), x0=0, dx=h, name='inp.', **style[0])
+    y_ = x_ * blackBox2
+    trace_e_y = go.Scatter( y=list(y_), x0=0, dx=h, name='out.', **style[1])
     
+    fig = tools.make_subplots(rows=2, cols=1, shared_xaxes=True)
+    fig.append_trace(trace_e_x, 1, 1)
+    fig.append_trace(trace_e_y, 2, 1)
+    fig['layout'].update(height=500, width=700)
+    fig['layout']['xaxis1'].update(range=[0, 4.3], title='t')
+    #fig['layout']['xaxis2'].update(range=[0, 4.3], title='t')
+    fig['layout']['yaxis1'].update(range=[-300e12, 200e12], title='x(t)')
+    fig['layout']['yaxis2'].update(range=[-0.31, 0.41], title='y(t)')
+    return fig
+
+######################################################
+
 app.layout = html.Div([
     dcc.Markdown(children=r'''
 # Discrete representations of generalized time domain functions
@@ -144,11 +164,9 @@ or function containing negative delay, like
 f_1111 = 0.5 * PolyNum('const:(~1~,2~2~2~2~...~)')
 p_tr = PolyNum('const:(~2~,-4~4~-4~4~...~)') # 2*(~1~-1~)/(~1~1~)
 
-h_a = [0.4,0.8] # diffrent sampling periods for graphs
-x_a = []
-for h in h_a:  # diffrent sampling periods
-    p = 1/h * p_tr
-    x_a += [ p * f_1111 * p ]
+# h - sampling period from slider
+p = 1/h * p_tr
+x_a = p * f_1111 * p
 ```
 '''
     ),
@@ -173,12 +191,9 @@ for h in h_a:  # diffrent sampling periods
 T₀ = 0.04
 
 ```python
-h_b = [0.15,0.2] # diffrent sampling periods for graphs
-x_b = []
 T_0 = 0.04
-for h in h_b:
-    p = 1/h * p_tr
-    x_b += [ p * f_1111 * 1 / (p² + p + 4) * ( -(-T_0) * ( (p² +1).sqrt() ) ).exp() ]
+p = 1/h * p_tr
+x_b = p * f_1111 * 1 / (p**2 + p + 4) * ( -(-T_0) * ( (p**2 +1).sqrt() ) ).exp()
 ```
 '''
     ),
@@ -207,10 +222,8 @@ Neutralizing negative delay operator we get regular function for $t ≥ 0$
 T₀ = 0.04
 
 ```python
-x_b0 = []
-for h in h_b:
-    p = 1/h * p_tr
-    x_b0 += [ p * f_1111 * 1 / (p² + p + 4) * ( -(-T_0) * ( (p**2 +1).sqrt() ) ).exp() * (-T_0*p).exp() ]
+p = 1/h * p_tr
+x_b0 = p * f_1111 * 1 / (p**2 + p + 4) * ( -(-T_0) * ( (p**2 +1).sqrt() ) ).exp() * (-T_0*p).exp()
 ```
 '''
     ),
@@ -236,33 +249,94 @@ for h in h_b:
 
 ## Derivative of the step function on input of black box  
 
-{*x_d(t)*} = { dᵃ/dtᵃ *δ(t*) } = *p* · {1} · *p*ᵃ 
+{*x(t)*} = { dᵃ/dtᵃ *δ(t)* } = *p* · {1} · *p* ᵃ 
 
 Sequences of the samples, which correspond to this abstract functions - a-th derivative of Dirac's delta function can be used to filter characteristic of DSP algorithm closed in black box.
 
+```python
+# a, h - from sliders
+p = 1/h * p_tr
+blackBox1 = 1 / (p**2 + p + 4)
+x_ =  f_1111 * p**(a+1)
+y_ = x_ * blackBox1
+```
     
 ''' ),
     html.Div([
-        html.Label('Change derivative level _a_:'),
-        dcc.Slider(
-            id='sli_a', value=2.0, min=-1.0, max=2.6, step=0.1
-            , updatemode='drag', className='sli_h'
-            , marks={0:0,1:1,2:2} ),
-        html.Div(id='slider-output-a'),
-        html.Label('Change sampling step _h_:'),
-        dcc.Slider(
-            id='sli_h_d', value=0.15, min=0.05, max=0.2, step=0.01, 
-            updatemode='drag', className='sli_h')
-        ],
-        style={'width':600, 'padding':10}
-    ),
+    
+        html.Div([
+            html.Label('Derivative level:'),
+            dcc.Slider(
+                id='sli_aa', value=2.0, min=-1.0, max=2.6, step=0.1
+                , updatemode='drag', className='sli_h'
+                , marks={0:'0',1:'1',2:{'label':'2', 'style':{'color':'red'}}} ),
+            html.Div('a=',id='slider-output-aa'),
+        ], style={'padding':'0 10px', 'width': '44%', 'display': 'inline-block'}),
+        html.Div([
+            html.Label('Sampling step:'),
+            dcc.Slider(
+                id='sli_h_d', value=0.15, min=0.05, max=0.2, step=0.01, 
+                updatemode='drag', className='sli_h'),
+            html.Div('h=',id='slider-output-h_d')
+        ], style={'padding':'0 10px', 'width': '44%', 'display': 'inline-block'}),
+    ], style={'width':600, 'paddingLeft':10}),
     dcc.Graph(
         id='grf_d',
         figure=compute_fig_xy_d(2.0, 0.15)
-    )
-], 
-className="container"
+    ),
+    dcc.Markdown(children=r'''
+Although *x(t)* is "unrealistic function" ( (a+1)  - derivative of the step function), it samples can be generated and applied into input of black box. For *a* ≤ 2.0 output of black box gives samples of "realistic function" *y(t)*, that means - smaller *h* leads to  more accurate *y(t)*. For *a* > 2.0 output is not convergent with decreasing *h*.
+''' ),
+
+    dcc.Markdown(children=r'''
+---
+
+## Delay operator with negative delay on input of black box
+
+{*x(t)*} = *p* · {1} · exp(-(-*b*) *p*) } 
+
+Sequences of the samples, which correspond to this abstract functions - function with negative delay operator - can be used to filter delay operator of DSP algorithm closed in black box.
+
+```python
+# b, h - from sliders
+p_ = 1/h * p_tr
+blackBox2 =  1 / (p_**2 + p_ + 4) * ( -0.5 * ( (p_**2 +1).sqrt() ) ).exp()
+x_ =  p_ * f_1111 * (b*p_).exp()
+y_ = x_ * blackBox2
+```
+''' ),
+    html.Div([
+    
+        html.Div([
+            html.Label('Negative delay:'),
+            dcc.Slider(
+                id='sli_bb', value=0.5, min=-1.0, max=1.0, step=0.02
+                , updatemode='drag', className='sli_h'
+                , marks={0:'0', 1:'1',0.5:{'label':'0.5', 'style':{'color':'red'}}} ),
+            html.Div('b=',id='slider-output-bb'),
+        ], style={'padding':'0 10px', 'width': '44%', 'display': 'inline-block'}),
+        html.Div([
+            html.Label('Sampling step:'),
+            dcc.Slider(
+                id='sli_h_e', value=0.15, min=0.05, max=0.2, step=0.01, 
+                updatemode='drag', className='sli_h'),
+            html.Div('h=',id='slider-output-h_e')
+        ], style={'padding':'0 10px', 'width': '44%', 'display': 'inline-block'}),
+    ], style={'width':600, 'paddingLeft':10}),
+    dcc.Graph(
+        id='grf_e',
+        figure=compute_fig_xy_e(0.5, 0.15)
+    ),
+    dcc.Markdown(children=r'''
+Although *x(t)* is "unrealistic function" (pure delay operator with negative delay), it samples can be generated and applied into input of black box. For *b* ≤ 0.5 output of black box gives samples of "realistic function" *y(t)*, that means - smaller *h* leads to  more accurate *y(t)*. For *b* > 0.5 output is not convergent with decreasing *h*.
+
+* [PN on GitHub](https://github.com/andrzejQ/Polynomial_Numbers.py)
+* [PN www](http://www.pei.prz.edu.pl/%7Ekubaszek/index_en.html)
+''' )
+], style={'padding':30}, className="container"
 )
+
+#############
 
 @app.callback(Output('grf2_44_44', 'figure'),
              [Input('sli_h_a', 'value')])
@@ -282,19 +356,40 @@ def data_analysis_x_b0(new_slider_values):
     new_figure = compute_fig_x_b0(*new_slider_values)
     return new_figure
 
-@app.callback(Output('slider-output-a', 'children'),
-             [Input('sli_a', 'value')])
+@app.callback(Output('slider-output-aa', 'children'),
+             [Input('sli_aa', 'value')])
 def update_output_sli_a(a):
-    return '     a = {}'.format(a)
-
+    return 'a = {}'.format(a)
+    
+@app.callback(Output('slider-output-h_d', 'children'),
+             [Input('sli_h_d', 'value')])
+def update_output_sli_a(h):
+    return 'h = {}'.format(h)
     
 @app.callback(Output('grf_d', 'figure'),
-             [Input('sli_a', 'value'), Input('sli_h_d', 'value')])
+             [Input('sli_aa', 'value'), Input('sli_h_d', 'value')])
 def data_analysis_xy_d(a, h):
     new_figure = compute_fig_xy_d(a, h)
     return new_figure
 
+
+@app.callback(Output('slider-output-bb', 'children'),
+             [Input('sli_bb', 'value')])
+def update_output_sli_a(a):
+    return 'b = {}'.format(a)
     
+@app.callback(Output('slider-output-h_e', 'children'),
+             [Input('sli_h_e', 'value')])
+def update_output_sli_a(h):
+    return 'h = {}'.format(h)
+    
+@app.callback(Output('grf_e', 'figure'),
+             [Input('sli_bb', 'value'), Input('sli_h_e', 'value')])
+def data_analysis_xy_e(b, h):
+    new_figure = compute_fig_xy_e(b, h)
+    return new_figure
+
+
 if __name__ == '__main__':
-    app.run_server()
+    app.run_server(debug=True)
 # »« √· ⅟  ∫ᵗ≠≤≥ ⁰¹²³⁴⁵⁶⁸⁹⁺⁻ᵃ°ⁱⁿªº⁽⁾ ₀₁₂₃₄₆₇₈₉₊₋₌₎ₐₑₒ ¼½ δ ∞
