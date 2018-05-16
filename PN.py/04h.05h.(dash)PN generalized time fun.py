@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#heroku: import os         
 import dash  # http://localhost:8050/ #interactive graphs like 04.PN...ipynb, but without mathJax
 import dash_core_components as dcc
 import dash_html_components as html
@@ -19,6 +20,8 @@ style = [{"line": {"color": "rgba (255, 0, 0, 1)", "dash": "6px,3px", "width": 0
     }]
 
 app = dash.Dash()
+#heroku: app = dash.Dash(__name__)
+#heroku: server = app.server
 
 layout_a = go.Layout(autosize=False, width=700, height=220,
     margin=go.Margin(l=50, r=50, b=40, t=20, pad=4),
