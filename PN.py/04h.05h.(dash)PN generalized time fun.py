@@ -99,13 +99,13 @@ def compute_fig_xy_(a, h, x_p_, blackBox_): # arg: sliders values, x_p_(a, p), b
     p = 1/h * p_tr
     blackBox1 = blackBox_(p)
     x_ =  x_p_(a, p)
-    trace_d_x = go.Scatter( y=list(x_), x0=0, dx=h, name='inp.', **style[0])
+    trace___x = go.Scatter( y=list(x_), x0=0, dx=h, name='inp.', **style[0])
     y_ = x_ * blackBox1
-    trace_d_y = go.Scatter( y=list(y_), x0=0, dx=h, name='out.', **style[1])
+    trace___y = go.Scatter( y=list(y_), x0=0, dx=h, name='out.', **style[1])
     
     fig = tools.make_subplots(rows=2, cols=1, shared_xaxes=True)
-    fig.append_trace(trace_d_x, 1, 1)
-    fig.append_trace(trace_d_y, 2, 1)
+    fig.append_trace(trace___x, 1, 1)
+    fig.append_trace(trace___y, 2, 1)
     fig['layout'].update(height=500, width=700)
     fig['layout']['xaxis1'].update(range=[0, 4.3], title='t')
     #fig['layout']['xaxis2'].update(range=[0, 4.3], title='t')
