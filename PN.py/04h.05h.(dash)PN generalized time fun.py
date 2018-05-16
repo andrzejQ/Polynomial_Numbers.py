@@ -108,6 +108,8 @@ def compute_fig_xy_e(b, h): # arg: sliders values
     return fig
 
 ######################################################
+import os
+imgDir= os.getcwd()+'/img/'
 
 app.layout = html.Div([
     dcc.Markdown(children=r'''
@@ -117,7 +119,11 @@ app.layout = html.Div([
 Floating point arithmetic for 'numbers' with digits such as real numbers, can be used to solve differential or difference equations using Mikusinski's or Bellert's operational calculus theory.
 
 # Discrete representations of generalized time domain functions
-
+'''
+    ),
+    #html.Img({'src':imgDir+"LaplZ_PN_.png", 'align':"right", 'width':"44%", 'alt':"LaplZ_PN_"}),
+    html.Img(src=imgDir+"LaplZ_PN_.png", alt="LaplZ_PN_"),
+    dcc.Markdown(children=r'''
 ## Laplace transform
 
 The functions of continuous time defined for *t* ≥ 0, can be expressed in **Mikusinski's operational calculus** in form of functions of **Heaviside's operator** *p* = 1 / ∫  
@@ -127,7 +133,7 @@ where *X(p)* denote **Laplace transform** formulas:
 
 {1} denotes function, with value 1 for all *t* ≥ 0 .
 
-For example { 200 sin(t) } = ( 200 · 2 / (p² + 4) ) · *p* · {1} .
+For example { 200 sin(2t) } = ( 200 · 2 / (p² + 4) ) · *p* · {1} .
 
 ##  Z-transform
 

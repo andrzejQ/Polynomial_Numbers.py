@@ -28,7 +28,7 @@ get_ipython().run_line_magic('matplotlib', 'inline')
 # 
 # $ \{1\} $ denotes function, with value $ 1 $ for all $ t \geq 0 $.
 # 
-# For example $ \{ 200\ sin(t) \} = \color{magenta}{200\ \cfrac{2}{p^2 + 4}} \color{brown}{  \cdot  p \cdot \{1\} }$.
+# For example $ \{ 200\ sin(2t) \} = \color{magenta}{200\ \cfrac{2}{p^2 + 4}} \color{brown}{  \cdot  p \cdot \{1\} }$.
 # 
 # ##  Z-transform
 # 
@@ -70,7 +70,6 @@ get_ipython().run_line_magic('matplotlib', 'inline')
 
 
 # plt.plot() #(Codefolding extension)
-get_ipython().run_line_magic('matplotlib', 'inline')
 import matplotlib.pyplot as plt
 plt.rc('lines', linewidth=1)
 plt.rcParams["figure.figsize"] = [11,4]

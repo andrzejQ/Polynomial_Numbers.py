@@ -6,6 +6,7 @@
 
 from PNlib.PolyNum import PolyNum
 # place folder `PNlib` near to *.ipynb
+get_ipython().run_line_magic('matplotlib', 'inline')
 
 
 # 
@@ -21,7 +22,7 @@ from PNlib.PolyNum import PolyNum
 # 
 # $ \{1\} $ denotes function, with value $ 1 $ for all $ t \geq 0 $.
 # 
-# For example $ \{ 200\ sin(t) \} = 200\ \cfrac{2}{p^2 + 4} \color{brown}{  \cdot  p \cdot \{1\} }$.
+# For example $ \{ 200\ sin(2t) \} = 200\ \cfrac{2}{p^2 + 4} \color{brown}{  \cdot  p \cdot \{1\} }$.
 # 
 # ##  Z-transform
 # 
@@ -84,7 +85,6 @@ U_C = E * Z_C / Z
 
 
 # plt.plot(E, 'r--',U_C, 'b-') #(Codefolding extension)
-get_ipython().run_line_magic('matplotlib', 'inline')
 import matplotlib.pyplot as plt
 plt.plot(E, 'r--',U_C, 'b-')
 plt.text(0.6,10.4,"$ e(t) $", fontsize=16, color='red')

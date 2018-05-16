@@ -8,9 +8,10 @@ from PNlib import PolyNumConf
 # place folder `PNlib` near to *.ipynb
 PolyNumConf.max_N=32 # PN significant digits number (restart jupyter kernel on change)
 from PNlib.PolyNum import PolyNum
+get_ipython().run_line_magic('matplotlib', 'notebook')
 
 
-# Interactive options of this notebook are not working in GitHub nbviewer (but static version of graph can be viewed). You can run it in full Jupyter notebook environment.
+# Interactive options of this notebook are not working in GitHub nbviewer (but static version of graph can be viewed). You can run it in full Jupyter notebook environment - [go to live mybind version](https://mybinder.org/v2/gh/andrzejQ/Polynomial_Numbers.py.git/master?filepath=PN.py/05.PN%20-%20Black%20box.ipynb)
 
 # If you have already read [04. PN generalized time domain functions](04.PN generalized time domain functions.ipynb) skip introduction and goto to [Derivative of the step function ...](#Derivative-of-the-step-function-on-input-of-black-box)
 
@@ -28,7 +29,7 @@ from PNlib.PolyNum import PolyNum
 # 
 # $ \{1\} $ denotes function, with value $ 1 $ for all $ t \geq 0 $.
 # 
-# For example $ \{ 200\ sin(t) \} = \color{magenta}{200\ \cfrac{2}{p^2 + 4}} \color{brown}{  \cdot  p \cdot \{1\} }$.
+# For example $ \{ 200\ sin(2t) \} = \color{magenta}{200\ \cfrac{2}{p^2 + 4}} \color{brown}{  \cdot  p \cdot \{1\} }$.
 # 
 # ##  Z-transform
 # 
@@ -69,7 +70,6 @@ from PNlib.PolyNum import PolyNum
 # In[2]:
 
 
-get_ipython().run_line_magic('matplotlib', 'notebook')
 from ipywidgets import *
 
 
@@ -94,7 +94,7 @@ p_tr = PolyNum('const:(~2~,-4~4~-4~4~...~)')
 # 
 # $ \{x_a(t)\}  = \{ \cfrac{\mathrm{d}^a}{\mathrm{d}t^a} \delta(t) \} = \color{brown}{ p \cdot \{1\} \cdot \ } \color{magenta}{p^a} $ 
 # 
-# Sequences of the samples, which correspond to this abstract functions - a-th derivative of Dirac's delta function, or function with negative delay operator can be used to filter characteristic of DSP algorithm closed in black box.
+# Sequences of the samples, which correspond to this abstract functions - a-th derivative of Dirac's delta function can be used to filter characteristic of DSP algorithm closed in black box.
 # 
 
 # In[5]:
@@ -105,7 +105,7 @@ h = 0.15
 p = 1/h * p_tr
 blackBox1 = 1 / (p**2 + p + 4)
 t = [k*h for k in range(len(p))]
-fig = plt.figure(figsize=(8,5))
+fig = plt.figure(figsize=(7,4))
 a = 1.9
 x_a =  f_1111 * p**(a+1) # p * f_1111 * p**a
 ax1 = fig.add_subplot(2, 1, 1)
@@ -132,6 +132,10 @@ def update(a=2.0, h=0.15):
 interact(update, a=(-1,2.6,0.1), h=(0.05,0.2,0.01));
 
 
+# ```diff
+# + - - - - - - - - - - - - - - - - - - - - - - - - - -
+# - If you do not see here 2 sliders for a____ and h____, then from `jupyter` menu choose `Cell` \ `Run all`.
+# ```
 # Although $ x_a(t) $ is "unrealistic function" ($ (a+1) $ - derivative of the step function), it samples can be generated and applied into input of black box. For $ a \le 2.0 $ output of black box gives samples of "realistic function" $ y(t) $, that means - smaller $ h $ leads to  more accurate $ y(t) $. For $ a > 2.0 $ output is not convergent with decreasing $ h $.
 
 # - - - -
@@ -151,7 +155,7 @@ h_ = 0.15
 p_ = 1/h_ * p_tr
 blackBox2 = 1 / (p_**2 + p_ + 4) * ( -0.5 * ( (p_**2 +1).sqrt() ) ).exp()
 t_ = [k*h_ for k in range(len(p_))]
-fig_ = plt.figure(figsize=(8,5))
+fig_ = plt.figure(figsize=(7,4))
 b = 0.5
 x_b = p_ * f_1111 * (b*p_).exp()
 ax1_ = fig_.add_subplot(2, 1, 1)
@@ -178,6 +182,10 @@ def update_(b = 0.5, h_=0.15):
 interact(update_, b=(-1,1,0.02), h_=(0.05,0.2,0.01));
 
 
+# ```diff
+# + - - - - - - - - - - - - - - - - - - - - - - - - - -
+# - If you do not see here 2 sliders for b____ and h____, then from `jupyter` menu choose `Cell` \ `Run all`.
+# ```
 # Although $ x_b(t) $ is "unrealistic function" (pure delay operator with negative delay), it samples can be generated and applied into input of black box. For $ b \le 0.5 $ output of black box gives samples of "realistic function" $ y(t) $, that means - smaller $ h\_ $ leads to  more accurate $ y(t) $. For $ b > 0.5 $ output is not convergent with decreasing $ h\_ $.
 
 # - - - -
