@@ -49,14 +49,16 @@ def compute_fig_x_a(h_0, h_1): # arg: new_slider_value
         if h == h_a_old[n]:
             x_a += [None]
         else:
+            ##################################
             p = 1/h * p_tr
             x_a += [ p * f_1111 * p ]
+            ##################################
     if figures_a is None:
         traces_a = []
         for n, h in enumerate(h_a):  # diffrent sampling periods
             traces_a += [go.Scatter( y=list(x_a[n]), x0=0, dx=h, name='h='+str(h), **style[n] )]
-            figures_a={'data': go.Data(traces_a), 'layout': layout_a}
-    else: #only update y,x data i h was changed 
+        figures_a={'data': go.Data(traces_a), 'layout': layout_a}
+    else: #only update y,x data for changed h
         for n, x_ in enumerate(x_a):
             if x_:
                 h = h_a[n]
@@ -64,19 +66,35 @@ def compute_fig_x_a(h_0, h_1): # arg: new_slider_value
     return figures_a
 
 T_0 = 0.04
+figures_b = None
+h_b = [None, None]
     
 def compute_fig_x_b(h_0, h_1): # arg: new_slider_value
+    '''Compute x_b[ , ] only for changed h_0 or h_1'''
+    global figures_b, h_b
+    h_b_old = h_b
     h_b = [h_0,h_1] # 2 diffrent sampling periods for graphs
     x_b = []
-    for h in h_b:
-        p = 1/h * p_tr
-        x_b += [ p * f_1111 * 1 / (p**2 + p + 4) * ( -(-T_0) * ( (p**2 +1).sqrt() ) ).exp() ]
-    traces_b = []
     for n, h in enumerate(h_b):  # diffrent sampling periods
-        traces_b += [go.Scatter( y=list(x_b[n]), x0=0, dx=h, name='h='+str(h), **style[n] )]
-    new_figure_b={'data': go.Data(traces_b), 'layout': layout_b}
-    return new_figure_b
-    
+        if h == h_b_old[n]:
+            x_b += [None]
+        else:
+            ##################################
+            p = 1/h * p_tr
+            x_b += [ p * f_1111 * 1 / (p**2 + p + 4) * ( -(-T_0) * ( (p**2 +1).sqrt() ) ).exp() ]
+            ##################################
+    if figures_b is None:
+        traces_b = []
+        for n, h in enumerate(h_b):  # diffrent sampling periods
+            traces_b += [go.Scatter( y=list(x_b[n]), x0=0, dx=h, name='h='+str(h), **style[n] )]
+        figures_b={'data': go.Data(traces_b), 'layout': layout_b}
+    else: #only update y,x data for changed h
+        for n, x_ in enumerate(x_b):
+            if x_:
+                h = h_b[n]
+                figures_b['data'][n].update( y=list(x_), x=[k*h for k in range(len(x_))] )
+    return figures_b
+
 def compute_fig_x_b0(h_0, h_1): # arg: new_slider_value
     h_b0 = [h_0,h_1] # 2 diffrent sampling periods for graphs
     x_b0 = []
