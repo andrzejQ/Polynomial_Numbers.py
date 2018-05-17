@@ -85,7 +85,7 @@ blackBox1.yaxisRange = [-3.1, 2.1]
 
 def x_d(a, p):
     return f_1111 * p**(a+1)
-x_d.yaxisRange = [-100000, 100000]
+#x_d.yaxisRange = [-100000, 100000]
     
 def blackBox2(p_):
     return 1 / (p_**2 + p_ + 4) * ( -0.5 * ( (p_**2 +1).sqrt() ) ).exp()
@@ -93,12 +93,12 @@ blackBox2.yaxisRange = [-0.31, 0.41]
 
 def x_e(b, p_):
     return p_ * f_1111 * (b*p_).exp()
-x_e.yaxisRange = [-300e12, 200e12]
+#x_e.yaxisRange = [-300e12, 200e12]
     
 def compute_fig_xy_(a, h, x_p_, blackBox_): # arg: sliders values, x_p_(a, p), blackBox_(p)
     fig = getattr(x_p_, "_figures", None)
     h_old = getattr(x_p_, "_h", None)
-    blackBox = getattr(x_p_, "blackBox_", None)
+    blackBox = getattr(x_p_, "_blackBox", None)
 
     p = 1/h * p_tr
     if (blackBox is None) or (h_old != h):
@@ -123,6 +123,7 @@ def compute_fig_xy_(a, h, x_p_, blackBox_): # arg: sliders values, x_p_(a, p), b
         fig['data'][1].update( y=list(y_), x0=0, dx=h )
     x_p_._figures = fig
     x_p_._h = h
+    x_p_._blackBox = blackBox
     return fig
 
 ######################################################
