@@ -115,36 +115,28 @@ t = [k*h for k in range(len(p))]
 fig = plt.figure(figsize=(7,4))
 a = 1.9
 x_a =  x_a_(a, p)
-ax1 = fig.add_subplot(2, 1, 1)
-ax1.grid(b=True)
-ax2 = fig.add_subplot(2, 1, 2)
-ax2.grid(b=True)
+ax1 = fig.add_subplot(2, 1, 1); ax1.grid(b=True)
+ax2 = fig.add_subplot(2, 1, 2); ax2.grid(b=True)
 ax2.set_ylim((-3.0, 2.0))
 x_line, = ax1.plot(t, x_a , 'm-o', label='$ x_a(t) $')
 y_line, = ax2.plot(t, x_a * blackBox1, 'b-D', label='$ y(t) $')
 ax1.legend()
 ax2.legend()
 
-h1_old = a
-blackBox1_old = blackBox1
-
+h1_old = h
 def update(a=2.0, h=0.15):
-    global h1_old, blackBox1_old
+    global h1_old, blackBox1 #to save state for next call
     p = 1/h * p_tr
     if h1_old != h:
         blackBox1 = blackBox1_(p)
-        blackBox1_old, h1_old = blackBox1, h
-    else:
-        blackBox1 = blackBox1_old
+        h1_old = h #else: skip blacBox calc.
     t = [k*h for k in range(len(p))]
     x_a = x_a_(a, p)
-    x_line.set_xdata(t)
-    x_line.set_ydata(x_a)
-    y_line.set_xdata(t)
-    y_line.set_ydata(x_a * blackBox1)
+    x_line.set_xdata(t); x_line.set_ydata(x_a)
+    y_line.set_xdata(t); y_line.set_ydata(x_a * blackBox1)
     fig.canvas.draw()
 
-interact(update, a=(-1,2.6,0.1), h=(0.05,0.2,0.01));
+interact(update, a=(-1,2.4,0.1), h=(0.05,0.2,0.01));
 
 
 # ```diff
@@ -166,10 +158,10 @@ interact(update, a=(-1,2.6,0.1), h=(0.05,0.2,0.01));
 
 
 # interactive plot:
-def blackBox2_(p_):
-    return 1 / (p_**2 + p_ + 4) * ( -0.5 * ( (p_**2 +1).sqrt() ) ).exp()
-def x_b_(b, p_):
-    return p_ * f_1111 * (b*p_).exp()
+def blackBox2_(p):
+    return 1 / (p**2 + p + 4) * ( -0.5 * ( (p**2 +1).sqrt() ) ).exp()
+def x_b_(b, p):
+    return p * f_1111 * (b*p).exp()
 
 h_ = 0.15
 p_ = 1/h_ * p_tr
@@ -178,36 +170,27 @@ t_ = [k*h_ for k in range(len(p_))]
 fig_ = plt.figure(figsize=(7,4))
 b = 0.5
 x_b = x_b_(b, p_)
-ax1_ = fig_.add_subplot(2, 1, 1)
-ax1_.grid(b=True)
-ax2_ = fig_.add_subplot(2, 1, 2)
-ax2_.grid(b=True)
+ax1_ = fig_.add_subplot(2, 1, 1); ax1_.grid(b=True)
+ax2_ = fig_.add_subplot(2, 1, 2); ax2_.grid(b=True)
 ax2_.set_ylim((-0.3,0.4))
 x_line_, = ax1_.plot(t_, x_b , 'm-o', label='$ x_b(t) $')
 y_line_, = ax2_.plot(t_, x_b * blackBox2, 'b-D', label='$ y(t) $')
-ax1_.legend()
-ax2_.legend()
+ax1_.legend(); ax2_.legend()
 
-h2_old = a
-blackBox2_old = blackBox2
-
-def update_(b = 0.5, h_=0.15):
-    global h2_old, blackBox2_old
+h2_old = h_
+def update_(b=0.5, h_=0.15):
+    global h2_old, blackBox2 #to save state for next call
     p_ = 1/h_ * p_tr
     if h2_old != h_:
         blackBox2 = blackBox2_(p_)
-        blackBox2_old, h2_old = blackBox2, h_
-    else:
-        blackBox2 = blackBox2_old
+        h2_old = h_ #else: skip blacBox calc.
     t_ = [k*h_ for k in range(len(p_))]
     x_b = x_b_(b, p_)
-    x_line_.set_xdata(t_)
-    x_line_.set_ydata(x_b)
-    y_line_.set_xdata(t_)
-    y_line_.set_ydata(x_b * blackBox2)
+    x_line_.set_xdata(t_); x_line_.set_ydata(x_b)
+    y_line_.set_xdata(t_); y_line_.set_ydata(x_b * blackBox2)
     fig_.canvas.draw()
 
-interact(update_, b=(-1,1,0.02), h_=(0.05,0.2,0.01));
+interact(update_, b=(-1,0.56,0.02), h_=(0.05,0.2,0.01));
 
 
 # ```diff
