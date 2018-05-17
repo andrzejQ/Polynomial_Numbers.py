@@ -103,13 +103,18 @@ p_tr = PolyNum('const:(~2~,-4~4~-4~4~...~)')
 
 
 # interactive plot:
+def blackBox1_(p):
+    return 1 / (p**2 + p + 4)
+def x_a_(a, p):
+    return f_1111 * p**(a+1) # p * f_1111 * p**a
+
 h = 0.15
 p = 1/h * p_tr
-blackBox1 = 1 / (p**2 + p + 4)
+blackBox1 = blackBox1_(p)
 t = [k*h for k in range(len(p))]
 fig = plt.figure(figsize=(7,4))
 a = 1.9
-x_a =  f_1111 * p**(a+1) # p * f_1111 * p**a
+x_a =  x_a_(a, p)
 ax1 = fig.add_subplot(2, 1, 1)
 ax1.grid(b=True)
 ax2 = fig.add_subplot(2, 1, 2)
@@ -120,11 +125,19 @@ y_line, = ax2.plot(t, x_a * blackBox1, 'b-D', label='$ y(t) $')
 ax1.legend()
 ax2.legend()
 
+h1_old = a
+blackBox1_old = blackBox1
+
 def update(a=2.0, h=0.15):
+    global h1_old, blackBox1_old
     p = 1/h * p_tr
-    blackBox1 = 1 / (p**2 + p + 4)
+    if h1_old != h:
+        blackBox1 = blackBox1_(p)
+        blackBox1_old, h1_old = blackBox1, h
+    else:
+        blackBox1 = blackBox1_old
     t = [k*h for k in range(len(p))]
-    x_a =  f_1111 * p**(a+1)
+    x_a = x_a_(a, p)
     x_line.set_xdata(t)
     x_line.set_ydata(x_a)
     y_line.set_xdata(t)
@@ -153,13 +166,18 @@ interact(update, a=(-1,2.6,0.1), h=(0.05,0.2,0.01));
 
 
 # interactive plot:
+def blackBox2_(p_):
+    return 1 / (p_**2 + p_ + 4) * ( -0.5 * ( (p_**2 +1).sqrt() ) ).exp()
+def x_b_(b, p_):
+    return p_ * f_1111 * (b*p_).exp()
+
 h_ = 0.15
 p_ = 1/h_ * p_tr
-blackBox2 = 1 / (p_**2 + p_ + 4) * ( -0.5 * ( (p_**2 +1).sqrt() ) ).exp()
+blackBox2 = blackBox2_(p_)
 t_ = [k*h_ for k in range(len(p_))]
 fig_ = plt.figure(figsize=(7,4))
 b = 0.5
-x_b = p_ * f_1111 * (b*p_).exp()
+x_b = x_b_(b, p_)
 ax1_ = fig_.add_subplot(2, 1, 1)
 ax1_.grid(b=True)
 ax2_ = fig_.add_subplot(2, 1, 2)
@@ -170,11 +188,19 @@ y_line_, = ax2_.plot(t_, x_b * blackBox2, 'b-D', label='$ y(t) $')
 ax1_.legend()
 ax2_.legend()
 
+h2_old = a
+blackBox2_old = blackBox2
+
 def update_(b = 0.5, h_=0.15):
+    global h2_old, blackBox2_old
     p_ = 1/h_ * p_tr
-    blackBox2 = 1 / (p_**2 + p_ + 4) * ( -0.5 * ( (p_**2 +1).sqrt() ) ).exp()
+    if h2_old != h_:
+        blackBox2 = blackBox2_(p_)
+        blackBox2_old, h2_old = blackBox2, h_
+    else:
+        blackBox2 = blackBox2_old
     t_ = [k*h_ for k in range(len(p_))]
-    x_b = p_ * f_1111 * (b*p_).exp()
+    x_b = x_b_(b, p_)
     x_line_.set_xdata(t_)
     x_line_.set_ydata(x_b)
     y_line_.set_xdata(t_)
