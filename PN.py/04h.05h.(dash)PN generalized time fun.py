@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-#heroku: import os         
 import dash  # http://localhost:8050/ #interactive graphs like 04.PN...ipynb, but without mathJax
 import dash_core_components as dcc
 import dash_html_components as html
@@ -12,16 +11,17 @@ from PNlib.PolyNum import PolyNum
 from plotly import tools
 import plotly.plotly as py
 import plotly.graph_objs as go
+
+app = dash.Dash()
+#heroku: app = dash.Dash(__name__)
+#heroku: server = app.server
+
 style = [{"line": {"color": "rgba (255, 0, 0, 1)", "dash": "6px,3px", "width": 0.8}, 
     "marker": {"color": "#FF0000", "size": 6.0, "symbol": "dot"}, "mode": "lines+markers"
     },
     {"line": {"color": "rgba (0, 0, 255, 1)", "dash": "solid", "width": 0.8}, 
     "marker": {"color": "#0000FF", "size": 6.0, "symbol": "diamond"}, "mode": "lines+markers"
     }]
-
-app = dash.Dash()
-#heroku: app = dash.Dash(__name__)
-#heroku: server = app.server
 
 layout_a = go.Layout(autosize=False, width=700, height=220,
     margin=go.Margin(l=50, r=50, b=40, t=20, pad=4),
@@ -113,9 +113,10 @@ def compute_fig_xy_(a, h, x_p_, blackBox_): # arg: sliders values, x_p_(a, p), b
         fig.append_trace(trace___x, 1, 1)
         fig.append_trace(trace___y, 2, 1)
         fig['layout'].update(height=500, width=700)
-        fig['layout']['xaxis1'].update(range=[0, 4.3], title='t')
+        fig['layout']['xaxis1'].update(range=[0, 4.8], title='t')
         #fig['layout']['xaxis2'].update(range=[0, 4.3], title='t')
-        fig['layout']['yaxis1'].update(range=x_p_.yaxisRange, title='x(t)')
+        fig['layout']['yaxis1'].update(title='x(t)') 
+        #fig['layout']['yaxis1'].update(range=x_p_.yaxisRange) #huge values...
         fig['layout']['yaxis2'].update(range=blackBox_.yaxisRange, title='y(t)')
     else:
         fig['data'][0].update( y=list(x_), x0=0, dx=h )
