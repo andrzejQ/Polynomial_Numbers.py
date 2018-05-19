@@ -809,26 +809,6 @@ class PolyNum(MantPN):
         ... 
         ValueError: PN exponent = 1 > 0 - inverese Laplce transform does not exist.
             
-        >>> from digitPN import flt
-        >>> Y = 1 / PolyNum('(~1~2~)') # Y(p) =   1 / (p + 2); y(t) = 1 * exp(-2*t)
-        >>> h = flt('0.07') 
-        >>> t = [tk*h for tk in range(len(Y))] #it sould be any length, but for test ...
-        >>> y, err = zip( *(Y.invTr1LaplPN(_t) for _t in t) )
-        >>> yPN = PolyNum(y)
-        >>> errPN = PolyNum(err)
-        >>> yPNok = PolyNum([digitPN.exp(-2*_t) for _t in t])
-        >>> #yPN
-        >>> #yPNok
-        >>> #errPN
-        >>> #yPNok - yPN
-        >>> #plt.plot(y, 'b-', err, 'r--') 
-        >>> import matplotlib.pyplot as plt
-        >>> _ = plt.plot(y, 'b-', label='y(t)=(1/(~1~2~)).invTr1LaplPN (t)') 
-        >>> _ = plt.plot(err, 'r--', label='err(t)') 
-        >>> plt.grid(b=True)
-        >>> _ = plt.legend()
-        >>> plt.show()
-
         """
         stop = False
         zero = self._mantissa[0] * 0
@@ -1002,13 +982,6 @@ class PolyNum(MantPN):
         >>> y = PolyNum(y)
         >>> abs( y - yOK ) <= (digitPN.epsilonPNdig*1024*1024) * PolyNum('const:(~1~,2~2~2~2~...~)')
         True
-        >>> #plt.plot(y, 'b-', err, 'r--') 
-        >>> import matplotlib.pyplot as plt
-        >>> _ = plt.plot(y, 'b-', label='y(t) = (~0~,10~20~30~).invTr05exp_b0_LaplPN (t, b0)') 
-        >>> _ = plt.plot(err, 'r--', label='err(t)') 
-        >>> plt.grid(b=True)
-        >>> _ = plt.legend()
-        >>> plt.show()
         """
         stop = False
         zero = self._mantissa[0] * 0
@@ -1250,9 +1223,55 @@ if __name__ == "__main__":
 #        rundocs
 #        )
 #    rundocs(); print('OK.')
+    import time
+    import doctest
+    start = time.time()
+    doctest.testmod();
+    print('OK. sec: ',time.time() - start) #sometimes kernel restart is needed...
 
-     import doctest
-     doctest.testmod(); print('OK.') #sometimes kernel restart is needed...
+    #from digitPN import flt
+    #Y = 1 / PolyNum('(~1~2~)') # Y(p) =   1 / (p + 2); y(t) = 1 * exp(-2*t)
+    #h = flt('0.07') 
+    #t = [tk*h for tk in range(len(Y))] #it sould be any length, but for test ...
+    #y, err = zip( *(Y.invTr1LaplPN(_t) for _t in t) )
+    #yPN = PolyNum(y)
+    #errPN = PolyNum(err)
+    #yPNok = PolyNum([digitPN.exp(-2*_t) for _t in t])
+    ##yPN
+    ##yPNok
+    ##errPN
+    ##yPNok - yPN
+    ##plt.plot(y, 'b-', err, 'r--') 
+    #import matplotlib.pyplot as plt
+    #_ = plt.plot(y, 'b-', label='y(t)=(1/(~1~2~)).invTr1LaplPN (t)') 
+    #_ = plt.plot(err, 'r--', label='err(t)') 
+    #plt.grid(b=True)
+    #_ = plt.legend()
+    #plt.show()
+    #
+    #Y = PolyNum('(~0~,10~20~30~)') # 
+    #h = flt('0.02') 
+    #b0 = flt('5')
+    #t = [(tk+1)*h for tk in range(len(Y))] #it sould be any length, but for test ...
+    #y, err = zip( *(Y.invTr05exp_b0_LaplPN(_t, b0) for _t in t) )
+    #def y_ok(t):
+    #    return flt('10')/digitPN.sqrt(digitPN.pi*t)*digitPN.exp(-b0*b0/t/4)+ \
+    #        flt('20')*digitPN.erfc(b0/digitPN.sqrt(t)/2)+ \
+    #        flt('60')*digitPN.sqrt(t/digitPN.pi)*digitPN.exp(-b0*b0/t/4)- \
+    #        flt('30')*b0*digitPN.erfc(b0/digitPN.sqrt(t)/2)
+    #yOK = PolyNum([y_ok(t_) for t_ in t])
+    #y = PolyNum(y)
+    
+    ##plt.plot(y, 'b-', err, 'r--') 
+    #import matplotlib.pyplot as plt
+    #_ = plt.plot(y, 'b-', label='y(t) = (~0~,10~20~30~).invTr05exp_b0_LaplPN (t, b0)') 
+    #_ = plt.plot(err, 'r--', label='err(t)') 
+    #plt.grid(b=True)
+    #_ = plt.legend()
+    #plt.show()
+    #
+    
+    
     
     #print(PolyNum([1,2,3]))
     #print(PolyNum(''))
