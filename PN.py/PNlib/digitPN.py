@@ -51,7 +51,8 @@ if PolyNumConf.FLOAT_TYPE == 'FLOAT-PYTHON':
     def strF(dig, chop_=True, signifi_=9):
         if dig and chop_: dig = chop(dig)
         try: return dig.__format__('1.'+str(signifi_)) #'1.9'
-        except ValueError: return str(dig) #without formatting (i.e. for int)
+        except (ValueError, TypeError): return str(dig) 
+            #without formatting (i.e. for int,  TypeError - for Fraction)
     
     floor = math.floor
     sqrt  = math.sqrt
@@ -88,7 +89,8 @@ elif PolyNumConf.FLOAT_TYPE == 'FLOAT-NUMPY':
     def strF(dig, chop_=True, signifi_=9):
         if dig and chop_: dig = chop(dig)
         try: return dig.__format__('1.'+str(signifi_)) #'1.9'
-        except ValueError: return str(dig) #without formatting (i.e. for int)
+        except (ValueError, TypeError): return str(dig) 
+            #without formatting (i.e. for int,  TypeError - for Fraction)
     
     floor = np.floor
     sqrt  = np.sqrt
@@ -104,7 +106,8 @@ else: #todo for yourself...
     def strF(dig):
         if dig: dig = chop(dig)
         try: return dig.__format__('1.9') 
-        except ValueError: return str(dig) #without formatting (i.e. for int)
+        except (ValueError, TypeError): return str(dig) 
+            #without formatting (i.e. for int,  TypeError - for Fraction)
     def getEpsilon(one):
         v=one; epsilon=one/1024
         while (v+epsilon > v ): epsilon = epsilon/2
