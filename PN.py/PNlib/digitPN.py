@@ -25,7 +25,7 @@ epsilonPNdig
 PNdig_isclose(a, b, rel_tol=epsilonPNdig*128, abs_tol=epsilonPNdig*128)
     compare equality of two PolyNum.mantissa digits
 """
-from __future__ import division
+from __future__ import division, unicode_literals
 __all__ = ['flt', 'strF', 'reprF', 'epsilonPNdig', 'onePNdig', 'zeroPNdig', 
            'PNdig_isclose']
 

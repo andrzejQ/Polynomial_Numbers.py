@@ -23,8 +23,12 @@ todo:
 """
 from __future__ import division, absolute_import, print_function, unicode_literals
 #from six import string_types #if isinstance(value, six.string_types)
-import numbers #isinstance(x, numbers.Integral) ...,numbers.Number)
-#but tested only in python 3.6+
+#but tested only in Python 3.6+ (CPython, IPyton/Spyder)
+
+#import numbers #isinstance(x, numbers.Integral) ...,numbers.Number)
+#2018-05-21 x is scalar == not hasattr(x, '__len__')
+#   But hasattr() take a litle time, so it also can be assumed, that operands
+#   are only float, int, or PolyNum, to avoid checking hasattr() 
 
 __all__ = ['PolyNum']
 
@@ -141,12 +145,13 @@ class PolyNum():
     PolyNum('(~1~,2.0~3~)')
     >>> print( PolyNum([3+digitPN.zeroPNdig,2,digitPN.onePNdig]) )
     (~3.0~,2~1.0~)
+    >>> PolyNum([0,0,3,4])
+    PolyNum('(~3~,4~)*(~1~0~)**(-2)')
     
     ### - other object, not dtype:
     ### >>> from fractions import Fraction
     ### >>> PolyNum([Fraction(1/2),Fraction(5,9),6])
     ### PolyNum('(~1/2~,5/9~6~)')
-    
     """
     __hash__ = None
     _max_N = PolyNumConf.max_N #num. of mantissa items
@@ -184,7 +189,10 @@ class PolyNum():
                 getMantissaExponent_fromStr(mantissa_or_pN_or_str, self._sep, self._max_N)
             exponentAdd += exponent1
         else: #mantissa_or_pN_or_str should be array_like
-            if isinstance(mantissa_or_pN_or_str, numbers.Number):
+            #if isinstance(mantissa_or_pN_or_str, numbers.Number):
+            if hasattr(mantissa_or_pN_or_str, '__len__'):
+                mantissa_or_pN_or_str = list(mantissa_or_pN_or_str)
+            else: #scalar
                 mantissa_or_pN_or_str = [mantissa_or_pN_or_str]
 
         self._initMant(mantissa_or_pN_or_str)
@@ -204,13 +212,6 @@ class PolyNum():
             mant = [digitPN.zeroPNdig] #type is determined in digitPN, rather not [0.0] 
         self._mantissa = list(mant[:self._max_N])
         self._fillZerosProc()
-#        mant = atleast_1d(mant) #objects as Fraction should work...
-#        if mant > 1:
-#            raise ValueError("Mantissa of Polynomial Number must be 1d only.")
-#todo np.isscalar(3.1) - after chceck if numpy is imported
-#but generally numpy is not needed here
-# import numpy as np
-# if isinstance(P, (list, tuple, np.ndarray))
 
     def _fillZerosProc(self):
         assert self._mantissa, "At least one element must exist, to add zeroes of the same type!"
@@ -391,31 +392,35 @@ class PolyNum():
         >>> p100 *= PolyNum([0.1,2],-5)
         >>> p100     
         PolyNum('(~10.0~,200.0~)*(~1~0~)**(-5)')
+        >>> p1 * [1,2,3,4]
+        Traceback (most recent call last):
+        ... 
+        ValueError: [1, 2, 3, 4] <- invalid operand for PN __mul__
+        >>> [5,6,7] * p1
+        Traceback (most recent call last):
+        ... 
+        ValueError: [5, 6, 7] <- invalid operand for PN __rmul__
         """
-        if not self.__nonzero__():
-            return PolyNum(self) #PolyNum() - copy of mantissa
-        if not other:
-            return PolyNum([0 * self._mantissa[0]])
         if isinstance(other, PolyNum):
             yMant = mantPN_mul(self.mantissa, other.mantissa, self._max_N)
-        else: #assume - other is scalar
+        elif not hasattr(other, '__len__'): #`other` is scalar
             yMant = [x * other for x in self.mantissa]
+        else:
+            raise ValueError(str(other)+" <- invalid operand for PN __mul__")
         expoOther = 0
         if hasattr(other, 'exponent'):
             expoOther = other.exponent
         return PolyNum(yMant, self.exponent + expoOther)
 
     def __rmul__(self, other): # case: other * self 
-        if not self.__nonzero__():
-            return PolyNum(self)
-        if not other:
-            return PolyNum([0 * self._mantissa[0]])
         if isinstance(other, PolyNum):
             yMant = mantPN_mul(other.mantissa, self.mantissa, self._max_N)
-        else: #assume - other is scalar
+        elif not hasattr(other, '__len__'): #`other` is scalar
             yMant = [other * x for x in self.mantissa]
+        else:
+            raise ValueError(str(other)+" <- invalid operand for PN __rmul__")
         expoOther = 0 #f.ex. int, real, 
-        if hasattr(other, 'exponent'): #this is rather __mul__ case
+        if hasattr(other, 'exponent'):
             expoOther = other.exponent
         return PolyNum(yMant, self.exponent + expoOther)
 
@@ -443,17 +448,24 @@ class PolyNum():
         >>> p100 /= PolyNum([0.1,0.2],-5)
         >>> p100._strPN_cut = 7; p100     
         PolyNum('(~1000.0~,-2000.0~4000.0~-8000.0~16000.0~-32000.0~64000.0~...~)*(~1~0~)**(5)')
-        
+        >>> p1 / [2,3,4]
+        Traceback (most recent call last):
+        ... 
+        ValueError: [2, 3, 4] <- invalid operand for PN __div__
+        >>> [3,4,5] / p1
+        Traceback (most recent call last):
+        ... 
+        ValueError: [3, 4, 5] <- invalid operand for PN __rdiv__
         """
-        if not self.__nonzero__():
-            return PolyNum(self) #PolyNum() - copy of mantissa
         if isinstance(other, PolyNum):
             yMant = mantPN_mul(
                 self.mantissa, 
                 mantPN_inv(other.mantissa, self._max_N), 
                 self._max_N)
-        else:
+        elif not hasattr(other, '__len__'): #`other` is scalar
             yMant = [x / other for x in self.mantissa]
+        else:
+            raise ValueError(str(other)+" <- invalid operand for PN __div__")
         expoOther = 0
         if hasattr(other, 'exponent'):
             expoOther = other.exponent
@@ -462,18 +474,18 @@ class PolyNum():
     __truediv__ = __div__
 
     def __rdiv__(self, other): # case: other / self 
-        if not other:
-            return PolyNum([0 * self._mantissa[0]])
         inv = mantPN_inv(self.mantissa, self._max_N)
         if isinstance(other, PolyNum):
             yMant = mantPN_mul(other.mantissa, inv, self._max_N)
         else:
-            if other == 1:
+            if other == 1  or  other == digitPN.onePNdig:
                 yMant = inv
-            else:
+            elif not hasattr(other, '__len__'): #`other` is scalar
                 yMant = [other * x for x in inv]
-        expoOther = 0 #f.ex. int, real
-        if hasattr(other, 'exponent'): #this is rather __mul__ case
+            else:
+                raise ValueError(str(other)+" <- invalid operand for PN __rdiv__")
+        expoOther = 0
+        if hasattr(other, 'exponent'):
             expoOther = other.exponent
         return PolyNum(yMant, expoOther - self.exponent)
 
@@ -503,7 +515,7 @@ class PolyNum():
         PolyNum('(~100.0~,0.0~0.0~0.0~0.1~2.0~)')
 
         """
-        if not other:
+        if not hasattr(other, '__len__') and not other:
             return PolyNum(self) #PolyNum() - copy of mantissa
         otherPN = PolyNum(other)
         if not self.__nonzero__():
@@ -584,15 +596,17 @@ class PolyNum():
         """
         if not a or not self.__nonzero__():  # results of x[0] **0 and 0 **a (rather =1) determined by mantissa[0] **a
             return PolyNum([self._mantissa[0] **a]) # (~1~,0~0~...~)
-        if (self.exponent != 0 and not isinstance(a, numbers.Integral)):
-            raise ValueError("Power only to int, real, rational by exponent 0 or to int otherwise")
+        #if (self.exponent != 0 and not isinstance(a, numbers.Integral)):
+        if (self.exponent != 0 and not isinstance(a, int)):
+            raise ValueError("Power only to int, real, rational by exponent == 0 or to int by exponent != 0")
         #if self.exponent == 0 power to int, real, rational allowed
         yMant = mantPN_power_real(self.mantissa, a, self._max_N)
         
         expo = 0
         if self.exponent != 0:
             expo = self.exponent * a
-            assert isinstance(expo, numbers.Integral)
+            #assert isinstance(expo, numbers.Integral)
+            assert isinstance(expo, int)
         return PolyNum(yMant, expo)
 
     def _MantPN_isclose(self, other, rel_tol=digitPN.epsilonPNdig*128, abs_tol=digitPN.epsilonPNdig*128): 
@@ -890,8 +904,10 @@ class PolyNum():
             else: #(-self.exponent) > 0
                 zero = 0 * self._mantissa[0]
                 mantissaE0 = [zero for __ in range(ex)] + self._mantissa 
-            return mantissaE0 #return NX.asarray(mantissaE0)
-    # def __array__(self): return NX.asarray(self.asList)
+            return mantissaE0 
+    #import numpy as np
+    #return np.asarray(mantissaE0)
+    # def __array__(self): return np.asarray(self.asList)
     
 #&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
@@ -1332,7 +1348,7 @@ _powersOfTwo = tuple(_powersOfTwo)  # (1, 2, 4, 8, 16, 32, 64, 128)
 def mantPN_val(p, x):
     """
     Evaluate (Horner's scheme) a MantPN `p` at specific value `x` - scalar 
-    or other objcets. Type of x is very important. x can be MantPN
+    or other objects. Type of x is very important.
 
     Examples
     --------
@@ -1394,7 +1410,7 @@ def mantPN_mul(x, h, N):
         y[k] = y[k] + x[k-j]*h[j]
     return y
     
-    #y = NX.convolve(x, h, mode='full') #'same' - max(M, N);  'full' - M+N-1
+    #y = np.convolve(x, h, mode='full') #'same' - max(M, N);  'full' - M+N-1
     #return y[:N]
 
 
@@ -1613,7 +1629,8 @@ if __name__ == "__main__":
     import doctest
     start = time.time()
     doctest.testmod();
-    print('OK. sec: ',time.time() - start) #sometimes kernel restart is needed...
+    print(type(PolyNum('~0~')[0]),'OK. sec: ',time.time() - start) #sometimes kernel restart is needed...
+
 #    from numpy.testing import (
 #        run_module_suite, assert_, assert_equal, assert_array_equal,
 #        assert_almost_equal, assert_array_almost_equal, assert_raises, 
@@ -1631,4 +1648,13 @@ if __name__ == "__main__":
     
     #import sys
     #print(sys.float_info)
-    #sys.float_info(max=1.7976931348623157e+308, max_exp=1024, max_10_exp=308, min=2.2250738585072014e-308, min_exp=-1021, min_10_exp=-307, dig=15, mant_dig=53, epsilon=2.220446049250313e-16, radix=2, rounds=1)    
+    #sys.float_info(max=1.7976931348623157e+308, max_exp=1024, max_10_exp=308, min=2.2250738585072014e-308, min_exp=-1021, min_10_exp=-307, dig=15, mant_dig=53, epsilon=2.220446049250313e-16, radix=2, rounds=1)
+    
+    
+    
+    if PolyNumConf.FLOAT_TYPE == 'FLOAT-NUMPY':
+        import numpy as np
+        npPN = PolyNum(np.asarray([1,2,3,4]))
+        print(npPN)
+        print(np.asarray(npPN)[:16])
+        print(npPN * 20)

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from __future__ import division, absolute_import, print_function
+from __future__ import division, absolute_import, print_function, unicode_literals
 #but tested only in python 3.6+
 
-#CPy: float: 0.028s, mp: 0.42s
-#iPy: float: 0.023s, mp: 0.35s
+#CPy: float: 0.066s, mp: 0.46s
+#iPy: float: 0.055s, mp: 0.38s
 
 
 import digitPN
@@ -150,6 +150,7 @@ def testSpeed():
     print(PolyNum('(~-1.1~2.2~,-3.3~)'))
     
 if __name__ == "__main__":
+    print(type(PolyNum('~0~')[0])) #mantissa[0]
     import timeit
     setup = "from __main__ import testSpeed"
     print( timeit.timeit( "testSpeed()", setup=setup, number=10) )
