@@ -7,7 +7,7 @@ from __future__ import division, absolute_import, print_function
 
 
 import digitPN
-from PolyNum import PolyNum
+from PolyNum02 import PolyNum
 
 def testSpeed():
     PolyNum()
@@ -126,6 +126,7 @@ def testSpeed():
     x2 = PolyNum(x,-2)
     list(x2)[:32]
     x4 = PolyNum(x,4)
+    x4
     from digitPN import flt
     Y = PolyNum('(~0~,10~20~30~)') # 
     h = flt('0.02') 

@@ -21,8 +21,8 @@ todo:
     more convenient PN.exp() if self.exponent > 0
 
 """
-from __future__ import division, absolute_import, print_function
-from six import string_types #if isinstance(value, six.string_types):
+from __future__ import division, absolute_import, print_function, unicode_literals
+#from six import string_types #if isinstance(value, six.string_types)
 import numbers #isinstance(x, numbers.Integral) ...,numbers.Number)
 #but tested only in python 3.6+
 
@@ -178,7 +178,8 @@ class PolyNum():
         
         if mantissa_or_pN_or_str is None:
             mantissa_or_pN_or_str = []
-        elif isinstance(mantissa_or_pN_or_str, string_types): # six.string_types
+        # elif isinstance(mantissa_or_pN_or_str, string_types): # six.string_types
+        elif isinstance(mantissa_or_pN_or_str, str): #__future__ unicode_literals
             mantissa_or_pN_or_str, exponent1 = \
                 getMantissaExponent_fromStr(mantissa_or_pN_or_str, self._sep, self._max_N)
             exponentAdd += exponent1
