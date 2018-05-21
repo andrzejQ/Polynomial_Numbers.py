@@ -21,27 +21,31 @@ todo:
     more convenient PN.exp() if self.exponent > 0
 
 """
-from __future__ import division, absolute_import, print_function
+from __future__ import division, absolute_import, print_function, unicode_literals
+#from six import string_types #if isinstance(value, six.string_types)
+import numbers #isinstance(x, numbers.Integral) ...,numbers.Number)
 #but tested only in python 3.6+
-from six import string_types #if isinstance(value, six.string_types):
 
 __all__ = ['PolyNum']
 
-import numbers #isinstance(x, numbers.Integral)
+#from itertools import zip_longest
 
-if __name__ == '__main__' or __name__ == 'PolyNum':
+if __name__ == '__main__' or __name__ == 'PolyNum02':
     #standalone tests: PolyNum -> rundocs(), doctest
     import PolyNumConf
     import digitPN
-    from MantPN import MantPN
 else: #relative package import    #print(f'''__nm__ = {__name__}''')
     from . import PolyNumConf
     # importing separately `PolyNumConf` in your app 
-    # some config param. can be changed prior to import `digitPN` `MantPN`.
+    # some config param. can be changed prior to import `digitPN`.
     from . import digitPN
-    from .MantPN import MantPN
 
-class PolyNum(MantPN):
+
+#######################################################################
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    
+    
+class PolyNum():
     """\
     A Polynomial Number class
     =========================
@@ -61,16 +65,19 @@ class PolyNum(MantPN):
     Attributes:
     ----------
         mantissa: 
-            (in MantPN) the PN "digits", in decreasing (negative)
-            powers, starting from power 0.
-
+            the PN "digits", in decreasing (negative) powers, starting 
+            from power 0. List of _max_N elements, 
+            m[0] * p**(0) + m[1] * p**(-1) + ... +m[_max_N-1] * p**(-(_max_N-1))
+            If initial length is shorten then _max_N, mantissa is filled
+            with zeros of type as first element.
+    
         exponent:
             (int)
     
         _strPN_cut:
             (int) (not defined by default) could be added to istance, 
             to show first _strPN_cut digits in str() and repr().
-
+            
     Parameters
     ----------
     mantissa_or_pN_or_str : 
@@ -92,6 +99,10 @@ class PolyNum(MantPN):
             
     exponentAdd:
         value added to 0 or original PN exponent (if exists)
+    
+    Const. fixed as class attr.
+    ---------------------------
+    _max_N = PolyNumConf.max_N
         
     Examples
     --------
@@ -124,14 +135,27 @@ class PolyNum(MantPN):
     PolyNum('(~1.1~,2~3~)*(~1~0~)**(-2)')
     >>> p2 = PolyNum(p1, 12); p2
     PolyNum('(~1.1~,2~3~)*(~1~0~)**(10)')
-    >>> pM0 = PolyNum(MantPN([1.1,2,3])); pM0
+    >>> pM0 = PolyNum([1.1,2,3]); pM0
     PolyNum('(~1.1~,2~3~)')
+    >>> PolyNum([1,2.0,3])
+    PolyNum('(~1~,2.0~3~)')
+    >>> print( PolyNum([3+digitPN.zeroPNdig,2,digitPN.onePNdig]) )
+    (~3.0~,2~1.0~)
+    
+    ### - other object, not dtype:
+    ### >>> from fractions import Fraction
+    ### >>> PolyNum([Fraction(1/2),Fraction(5,9),6])
+    ### PolyNum('(~1/2~,5/9~6~)')
+    
     """
     __hash__ = None
-    
+    _max_N = PolyNumConf.max_N #num. of mantissa items
     _sep = PolyNumConf.sep #'~' # in str() and repr()
     
-    #property `mantissa` in MantPN and
+    @property
+    def mantissa(self):
+        """ A copy of the coefficients"""
+        return self._mantissa[:] #or  deepcopy ?
     @property
     def exponent(self):
         """ The exponent of the Polynomial Number """
@@ -146,7 +170,7 @@ class PolyNum(MantPN):
         (in zero PN case) mantissa is filled with zeroes.
         """
         if isinstance(mantissa_or_pN_or_str, PolyNum):
-            super(PolyNum,self).__init__(mantissa_or_pN_or_str.mantissa)
+            self._initMant(mantissa_or_pN_or_str.mantissa)
             self._exponent = exponentAdd
             if hasattr(self,'exponent'):
                 self._exponent = mantissa_or_pN_or_str.exponent + exponentAdd
@@ -154,7 +178,8 @@ class PolyNum(MantPN):
         
         if mantissa_or_pN_or_str is None:
             mantissa_or_pN_or_str = []
-        elif isinstance(mantissa_or_pN_or_str, string_types): # six.string_types
+        # elif isinstance(mantissa_or_pN_or_str, string_types): # six.string_types
+        elif isinstance(mantissa_or_pN_or_str, str): #__future__ unicode_literals
             mantissa_or_pN_or_str, exponent1 = \
                 getMantissaExponent_fromStr(mantissa_or_pN_or_str, self._sep, self._max_N)
             exponentAdd += exponent1
@@ -162,9 +187,43 @@ class PolyNum(MantPN):
             if isinstance(mantissa_or_pN_or_str, numbers.Number):
                 mantissa_or_pN_or_str = [mantissa_or_pN_or_str]
 
-        super(PolyNum,self).__init__(mantissa_or_pN_or_str)
+        self._initMant(mantissa_or_pN_or_str)
         self._exponent = exponentAdd
         self._normalize0() #case: PolyNum('(~0~,2.~-0.3~)'), 100
+
+    def _initMant(self, mant=None):
+        """
+        default init: [0.0, 0.0, ...] zeros of type digitPN.zeroPNdig
+        """
+        if isinstance(mant, PolyNum):
+            self._mantissa = mant.mantissa
+            return
+        
+        #if not mant: #numpy ValueError: The truth value of an array with more than one element is ambiguous.
+        if (mant is None) or not len(mant):
+            mant = [digitPN.zeroPNdig] #type is determined in digitPN, rather not [0.0] 
+        self._mantissa = list(mant[:self._max_N])
+        self._fillZerosProc()
+#        mant = atleast_1d(mant) #objects as Fraction should work...
+#        if mant > 1:
+#            raise ValueError("Mantissa of Polynomial Number must be 1d only.")
+#todo np.isscalar(3.1) - after chceck if numpy is imported
+#but generally numpy is not needed here
+# import numpy as np
+# if isinstance(P, (list, tuple, np.ndarray))
+
+    def _fillZerosProc(self):
+        assert self._mantissa, "At least one element must exist, to add zeroes of the same type!"
+        if len(self._mantissa) < self._max_N:
+            zero = 0 * self._mantissa[0]
+            self._mantissa += [zero for __ in range(self._max_N-len(self._mantissa))]
+
+    def _shrMantProc(self, r):
+        zero = 0 * self._mantissa[0]
+        if r > self._max_N:
+            r = self._max_N
+        zeros = [zero for __ in range(r)]
+        self._mantissa = zeros + self._mantissa[:(self._max_N - r)]
 
     def _normalize0(self): #return None
         """First digit non-zero or zero PN - to use in init"""
@@ -199,27 +258,6 @@ class PolyNum(MantPN):
         y._normalize0()
         return y
     
-    def asList(self):
-        '''
-        List normalized to exponent=0 for exponent <= 0
-        
-        '''
-        if not self.__nonzero__:
-            mantissaE0 = [self._mantissa[0] for __ in range(self._max_N)] #[0.,0.,0.,...]
-        else:
-            ex = -self.exponent 
-            if ex == 0:
-                mantissaE0 = self.mantissa
-            elif ex < 0:
-                raise ValueError(
-                    'PN exponent = {}. Can not convert to array if PN exponent > 0'\
-                    .format(-ex))
-            else: #(-self.exponent) > 0
-                zero = 0 * self._mantissa[0]
-                mantissaE0 = [zero for __ in range(ex)] + self._mantissa 
-            return mantissaE0 #return NX.asarray(mantissaE0)
-    # def __array__(self): return NX.asarray(self.asList)
-
     def __str__(self):
         '''
         Examples
@@ -295,7 +333,7 @@ class PolyNum(MantPN):
         s = self.__str__()
         return s.__format__(format_spec)
     
-    def __nonzero__(self): #different then in MantPN !
+    def __nonzero__(self): 
         return self._mantissa[0]
 
     def __len__(self):
@@ -316,7 +354,7 @@ class PolyNum(MantPN):
         """  
         if not self.__nonzero__():
             return val * 0 # zero of val type
-        y = super(PolyNum,self).__call__(val)
+        y = mantPN_val(self.mantissa, val)
         res = 1
         if self.exponent:
             res = val #val **self.exponent
@@ -325,7 +363,7 @@ class PolyNum(MantPN):
             return y / res
         else:
             return y * res
-
+            
     def __neg__(self):
         return PolyNum([-x for x in self._mantissa], self.exponent)
 
@@ -358,22 +396,28 @@ class PolyNum(MantPN):
             return PolyNum(self) #PolyNum() - copy of mantissa
         if not other:
             return PolyNum([0 * self._mantissa[0]])
-        y = super(PolyNum,self).__mul__(other)
+        if isinstance(other, PolyNum):
+            yMant = mantPN_mul(self.mantissa, other.mantissa, self._max_N)
+        else: #assume - other is scalar
+            yMant = [x * other for x in self.mantissa]
         expoOther = 0
         if hasattr(other, 'exponent'):
             expoOther = other.exponent
-        return PolyNum(y, self.exponent + expoOther)
+        return PolyNum(yMant, self.exponent + expoOther)
 
     def __rmul__(self, other): # case: other * self 
         if not self.__nonzero__():
             return PolyNum(self)
         if not other:
             return PolyNum([0 * self._mantissa[0]])
-        y = super(PolyNum,self).__mul__(other)
-        expoOther = 0 #f.ex. int, real, MantPN
+        if isinstance(other, PolyNum):
+            yMant = mantPN_mul(other.mantissa, self.mantissa, self._max_N)
+        else: #assume - other is scalar
+            yMant = [other * x for x in self.mantissa]
+        expoOther = 0 #f.ex. int, real, 
         if hasattr(other, 'exponent'): #this is rather __mul__ case
             expoOther = other.exponent
-        return PolyNum(y, self.exponent + expoOther)
+        return PolyNum(yMant, self.exponent + expoOther)
 
     def __div__(self, other): #self / other
         """
@@ -403,22 +447,35 @@ class PolyNum(MantPN):
         """
         if not self.__nonzero__():
             return PolyNum(self) #PolyNum() - copy of mantissa
-        y = super(PolyNum,self).__div__(other)
+        if isinstance(other, PolyNum):
+            yMant = mantPN_mul(
+                self.mantissa, 
+                mantPN_inv(other.mantissa, self._max_N), 
+                self._max_N)
+        else:
+            yMant = [x / other for x in self.mantissa]
         expoOther = 0
         if hasattr(other, 'exponent'):
             expoOther = other.exponent
-        return PolyNum(y, self.exponent - expoOther)
+        return PolyNum(yMant, self.exponent - expoOther)
 
     __truediv__ = __div__
 
     def __rdiv__(self, other): # case: other / self 
         if not other:
             return PolyNum([0 * self._mantissa[0]])
-        y = super(PolyNum,self).__rdiv__(other)
-        expoOther = 0 #f.ex. int, real, MantPN
+        inv = mantPN_inv(self.mantissa, self._max_N)
+        if isinstance(other, PolyNum):
+            yMant = mantPN_mul(other.mantissa, inv, self._max_N)
+        else:
+            if other == 1:
+                yMant = inv
+            else:
+                yMant = [other * x for x in inv]
+        expoOther = 0 #f.ex. int, real
         if hasattr(other, 'exponent'): #this is rather __mul__ case
             expoOther = other.exponent
-        return PolyNum(y, expoOther - self.exponent)
+        return PolyNum(yMant, expoOther - self.exponent)
 
     __rtruediv__ = __rdiv__
 
@@ -458,14 +515,15 @@ class PolyNum(MantPN):
         if a2.exponent < a1.exponent - self._max_N:
             return PolyNum(a1)
         if a2.exponent == a1.exponent: #it will be a common case - do not shrMant()
-            y = super(PolyNum,a1).__add__(a2)
+            # yMant = [a + b for (a,b) in zip_longest(a1.mantissa, a2.mantissa, fillvalue=0)])
+            yMant = [a + b for (a,b) in zip(a1.mantissa, a2.mantissa)]
         else:
             a2 = PolyNum(a2) #copy of a2 mantissa, which will be shifted
             a2._shrMantProc(a1.exponent - a2.exponent) 
             #because of leading zero a2 is treating as (~0~) PolynNum in debugger, 
             #but i.e. a2.mantissa == [0.0, 0.0, 1.0, 2, 3, 0.0, ... 
-            y = super(PolyNum,a1).__add__(a2) #y is MantPN()
-        return PolyNum(y, a1.exponent)._normalize()
+            yMant = [a + b for (a,b) in zip(a1.mantissa, a2.mantissa)]
+        return PolyNum(yMant, a1.exponent)._normalize()
 
     def __radd__(self, other):
         return self.__add__(PolyNum(other))
@@ -481,14 +539,14 @@ class PolyNum(MantPN):
         >>> PolyNum('(~1~2~3~)') - 100
         PolyNum('(~1.0~,2.0~-97.0~)*(~1~0~)**(2)')
         
-        >>> 100 - PolyNum([1.1,2,3],-2) #__radd__ test
+        >>> 100 - PolyNum([1.1,2,3],-2) #__rsub__ test
         PolyNum('(~100.0~,0.0~-1.1~-2~-3~)')
         
-        >>> p1 = PolyNum([1.1,2.5,3],-2) #__iadd__   test 
+        >>> p1 = PolyNum([1.1,2.5,3],-2) #__isub__   test 
         >>> p1 -= PolyNum([0.1,5.1],-4)
         >>> p1     
         PolyNum('(~1.1~,2.5~2.9~-5.1~)*(~1~0~)**(-2)')
-        >>> p100 = 100. #__iadd__   test 
+        >>> p100 = 100. #__isub__   test 
         >>> p100 -= PolyNum([0.1,2],-4)
         >>> p100     
         PolyNum('(~100.0~,0.0~0.0~0.0~-0.1~-2.0~)')
@@ -498,7 +556,7 @@ class PolyNum(MantPN):
     def __rsub__(self, other): # case: other - self 
         selfNeg = -self
         return selfNeg.__radd__(other)
-        
+
 
     def __pow__(self, a):
         """
@@ -529,14 +587,32 @@ class PolyNum(MantPN):
         if (self.exponent != 0 and not isinstance(a, numbers.Integral)):
             raise ValueError("Power only to int, real, rational by exponent 0 or to int otherwise")
         #if self.exponent == 0 power to int, real, rational allowed
-        y = super(PolyNum,self).__pow__(a)
+        yMant = mantPN_power_real(self.mantissa, a, self._max_N)
+        
         expo = 0
         if self.exponent != 0:
             expo = self.exponent * a
             assert isinstance(expo, numbers.Integral)
-        return PolyNum(y, expo)
+        return PolyNum(yMant, expo)
 
-        
+    def _MantPN_isclose(self, other, rel_tol=digitPN.epsilonPNdig*128, abs_tol=digitPN.epsilonPNdig*128): 
+        """
+        Return :
+        True if True for all pair digits a,b from self and others:
+        if a - b == 0 or |a - b| <= abs_tol: True 
+        else:
+            if (|a-b| and rel_tol) are compatybile type: 
+                |a-b| <= rel_tol*max(|a|,|b|)
+            else: 
+                raise NotImplementedError 
+        """
+        if not isinstance(other, PolyNum):
+            return NotImplemented
+        for a, b in zip(self.mantissa, other.mantissa):
+            if not digitPN.PNdig_isclose(a, b, rel_tol, abs_tol): # a != b:
+                return False
+        return True
+
     def isclose(self, other, rel_tol=digitPN.epsilonPNdig*128, abs_tol=digitPN.epsilonPNdig*128): 
         """
         Return :
@@ -563,7 +639,7 @@ class PolyNum(MantPN):
             a2._shrMantProc(a1.exponent - a2.exponent) 
             #because of leading zero a2 is treating as (~0~) PolynNum in debugger, 
             #but i.e. a2.mantissa == [0.0, 0.0, 1.0, 2, 3, 0.0, ... 
-        return a1.mantissa._MantPN_isclose(other.mantissa, rel_tol, abs_tol) 
+        return a1._MantPN_isclose(other, rel_tol, abs_tol) 
 
     def __eq__(self, other):
         return self.isclose(other)
@@ -582,8 +658,8 @@ class PolyNum(MantPN):
         >>> abs(PolyNum('(~2.4~,-1.1~-8.8~)'))
         PolyNum('(~2.4~,1.1~8.8~)')
         """
-        return PolyNum(super(PolyNum,self).__abs__(), self.exponent)
-        
+        return PolyNum([abs(x) for x in self.mantissa], self.exponent)
+
     def isnonnegative(self):
         """
         self >= 0
@@ -597,9 +673,13 @@ class PolyNum(MantPN):
         >>> PolyNum(0.0).isnonnegative()
         True
         """
-        return not self.__nonzero__() \
-            or super(PolyNum,self)._isnonnegative()
-            
+        if not self.__nonzero__():
+            return True
+        for x in self.mantissa:
+            if not x >= 0:
+                return False
+        return True
+
     def __le__(self, other):
         """
         self <= other
@@ -650,7 +730,7 @@ class PolyNum(MantPN):
         """
         if self._exponent and (self.exponent % 2): #odd
             raise ValueError("Does not support sqrt() if exponent is odd: {}.format()self.exponent")
-        return PolyNum(super(PolyNum,self).sqrt(), self._exponent // 2)
+        return PolyNum(mantPN_sqrt(self.mantissa, self._max_N), self._exponent // 2)
 
     def exp(self):
         """
@@ -672,14 +752,13 @@ class PolyNum(MantPN):
             raise ValueError("Todo(?) - case if exponent (== {}) is positive.".format(self.exponent))
             
         if self._exponent == 0: #it will be common case - do not shrMant()
-            return PolyNum(super(PolyNum,self).exp())
+            return PolyNum(mantPN_exp(self.mantissa, self._max_N))
         else:
             a2 = PolyNum(self) #copy of a2 mantissa, which will be shifted
             a2._shrMantProc(-a2._exponent) 
             # because of leading zero a2 is treating as (~0~), but i.e.
             # a2.mantissa [0.0, 0.0, 1.0, 2, 3, 0.0, ... 
-            return PolyNum(super(PolyNum,a2).exp())
-
+            return PolyNum(mantPN_exp(a2.mantissa, self._max_N))
 
 ####
     def expZ(self, pZ, T0, h):
@@ -710,9 +789,8 @@ class PolyNum(MantPN):
     def ln(self):
         if self._exponent: 
             raise ValueError("Does not support ln() if exponent is nonzero: {}.format()self.exponent")
-        return PolyNum(super(PolyNum,self).ln(), self._exponent)
-        
-        
+        return PolyNum(mantPN_ln(self.mantissa, self._max_N))
+
     def __getitem__(self, index):
         """
         index < 0 is not allowed
@@ -722,7 +800,6 @@ class PolyNum(MantPN):
             where exponent <= 0; exponent > 0 no allowed
         used in matplotlib.pyplot.plot
         
-        For tests set MantPN.QUICK_TEST = 1 i.e. MantPN.max_N = 32 
         >>> x = [ 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,\
                  17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32]
         >>> x1 = PolyNum(x)
@@ -771,7 +848,6 @@ class PolyNum(MantPN):
         """
         if __iter__ is not defined, then __getitem__ is used for list()
         
-        For tests set MantPN.QUICK_TEST = 1 i.e. MantPN.max_N = 32 
         >>> x = [ 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,\
                  17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32]
         >>> x1 = PolyNum(x)
@@ -790,10 +866,32 @@ class PolyNum(MantPN):
             return iter(self.mantissa)
         if self._exponent > 0: 
                 raise ValueError("if exponent(={}) is positive, PN __iter__  is not allowed".format(self._exponent))
-        y = ([0 * self._mantissa[0]] * (-self._exponent)) \
+        zero = 0 * self._mantissa[0]
+        y = ([zero for __ in range(-self._exponent)]) \
                     + self.mantissa[:self._exponent] # [:-(-self._exponent)]
         return iter(y)
-    
+
+    def asList(self):
+        '''
+        List normalized to exponent=0 - only if exponent <= 0
+        Can be longer than _max_N
+        
+        '''
+        if not self.__nonzero__:
+            mantissaE0 = [self._mantissa[0] for __ in range(self._max_N)] #[0.,0.,0.,...]
+        else:
+            ex = -self.exponent 
+            if ex == 0:
+                mantissaE0 = self.mantissa
+            elif ex < 0:
+                raise ValueError(
+                    'PN exponent = {}. Can not convert to array if PN exponent > 0'\
+                    .format(-ex))
+            else: #(-self.exponent) > 0
+                zero = 0 * self._mantissa[0]
+                mantissaE0 = [zero for __ in range(ex)] + self._mantissa 
+            return mantissaE0 #return NX.asarray(mantissaE0)
+    # def __array__(self): return NX.asarray(self.asList)
     
 #&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
@@ -1152,7 +1250,26 @@ def getMantissaExponent_fromStr(s, sep, max_N):
     PolyNum('(~2.5~,-0.3~)*(~1~0~)**(-1)')
     >>> PolyNum('(~-1.1~2.2~,-3.3~)')
     PolyNum('(~-1.1~,2.2~-3.3~)*(~1~0~)**(1)')
+    >>> PolyNum('')
+    PolyNum('(~0.0~)')
+    >>> PolyNum('c(~)')
+    Traceback (most recent call last):
+    ... 
+    ValueError: 'c(~)' error - unknow PN const format.
     '''
+        ## >>> print(getMantissaExponent_fromStr('','~',32))
+        ## ([], 0)
+        ## >>> print(getMantissaExponent_fromStr('0','~',32))
+        ## ([0.0], 0)
+        ## >>> print(getMantissaExponent_fromStr('(~,2.~-0.3~)','~',32))
+        ## ([0.0, 2.0, -0.3], 0)
+        ## >>> print(getMantissaExponent_fromStr('(~,2.~-0.3~)','~',32))
+        ## ([0.0, 2.0, -0.3], 0)
+        ## >>> print(getMantissaExponent_fromStr('const:(~2~,-4~4~-4~4~...~)','~',8))
+        ## ([2, -4, 4, -4, 4, -4, 4, -4], 0)
+        ## >>> print(getMantissaExponent_fromStr('const:(~1~,2~2~2~2~...~)','~',8))
+        ## ([1, 2, 2, 2, 2, 2, 2, 2], 0)
+        
     if not s:
         return [], 0
     me = s.replace(" ", "").split('**')
@@ -1197,85 +1314,313 @@ def getMantissaExponent_fromStr(s, sep, max_N):
     mant = [digitPN.flt(d) for d in m]
     return mant, expo
 
-
-
-
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
+#################### MantPN functions #################################
+
+#################### CONST ############################################
+
+
+_powersOfTwo = [1]
+while _powersOfTwo[-1] < PolyNumConf.max_N:
+    _powersOfTwo += [2 * _powersOfTwo[-1]]
+_powersOfTwo = tuple(_powersOfTwo)  # (1, 2, 4, 8, 16, 32, 64, 128)
+
+#######################################################################
+
+
+def mantPN_val(p, x):
+    """
+    Evaluate (Horner's scheme) a MantPN `p` at specific value `x` - scalar 
+    or other objcets. Type of x is very important. x can be MantPN
+
+    Examples
+    --------
+    >>> mantPN_val([3.0,0,1,2], 5.0)  # 3 * 5**0 + 0 * 5**(-1)1 + 1 * 5**(-2) + 2 * 5**(-3)
+    3.056
+    >>> mantPN_val([3,0,1,2], 5)
+    3.056
+    >>> from fractions import Fraction
+    >>> mantPN_val([3,0,1], Fraction(1,3))
+    Fraction(12, 1)
+
+    """
+    x_1 = 1/x
+    y = p[-1]
+    pp = p[::-1]
+    for p1 in pp[1:]:
+        y = y * x_1 + p1
+    return y
+
+def mantPN_mul(x, h, N):
+    """
+    Find the product of two mantPN.
+
+    Parameters
+    ----------
+    x, h : mantPN objects, both must have N elements!
+
+    Returns
+    -------
+    out : (x * h)[:N]
+
+    Examples
+    --------
+    >>> mantPN_mul([1, 2, 3], [9, 5, 1], 3)
+    [9, 23, 38]
+
+    >>> mantPN_mul([1, 2, 3], [9., 5, 1], 3)
+    [9.0, 23.0, 38.0]
+
+    dtype=object
+    >>> from fractions import Fraction
+    >>> p12 = [Fraction('1/2'), 10, 2]
+    >>> p12
+    [Fraction(1, 2), 10, 2]
+    >>> p13 = [Fraction('1/3'), 100, 0]
+    >>> p13
+    [Fraction(1, 3), 100, 0]
+    >>> mantPN_mul(p12, p13, 3)
+    [Fraction(1, 6), Fraction(160, 3), Fraction(3002, 3)]
+
+    >>> mantPN_mul([Fraction('1/2'), 10, 2.], [Fraction('1/3'), 100, 0], 3)
+    [Fraction(1, 6), Fraction(160, 3), 1000.6666666666666]
+
+    """
+    zero = (x[0]+h[0])*0 # zero of common-type of x and y
+    y = [zero for __ in range(N)]     # y = [zero]*N
+    for k in range(N):
+      for j in range(k+1):
+        y[k] = y[k] + x[k-j]*h[j]
+    return y
+    
+    #y = NX.convolve(x, h, mode='full') #'same' - max(M, N);  'full' - M+N-1
+    #return y[:N]
+
+
+def mantPN_inv(x, N):
+    """
+    Find an inversion of mantPN.
+
+    Parameters
+    ----------
+    x : mantPN object, must have N elements!
+
+    Returns
+    -------
+    y :  
+        (1 / x)[:N]
+
+    Examples
+    --------
+    >>> x = [0.5, 7, 0, 0, 0, 0, 0, 0]
+    >>> y = mantPN_inv(x, 8)
+    >>> print(y[:6])
+    [2.0, -28.0, 392.0, -5488.0, 76832.0, -1075648.0]
+    >>> print(mantPN_mul(x, y, 8))
+    [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    
+    """
+    zero = x[0] * 0
+    LoN = 0
+    while _powersOfTwo[LoN] < N:
+        LoN += 1 # 2**LoN >= N
+    #print(f'''N={N}, 2**   {_powersOfTwo[LoN]} -- {_powersOfTwo}''')
+    v = [zero for __ in range(_powersOfTwo[LoN])]   # v = [zero] * _powersOfTwo[LoN]
+    y = v[:]
+    if len(x) < len(v): # case if N != _powersOfTwo[LoN]
+        x = (x + v)[:len(v)]
+    y[0] = 1 / x[0] #x[0]**(-1), despite of x[0] type
+    for w in range(LoN):
+        nw = _powersOfTwo[w]
+        for k in range(nw):
+            v[k] = zero # unnecessary?
+            for j in range(nw):
+                v[k] = v[k] + y[j] * x[k+nw-j]
+        for k in range(nw):
+            y[k+nw] = zero # unnecessary?
+            for j in range(k+1):
+                y[k+nw] = y[k+nw] - y[k-j] * v[j]
+                #? if abs(y[k+nw]) >= sqrt(MaxFloat): y[k+nw] = sqrt(MaxFloat) ?
+    return y[:N]
+
+def mantPN_sqrt(x, N):
+    """
+    sqrt(x)[:N]
+    =====
+    
+    Examples
+    --------
+    >>> xx = [0.1,2.,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
+    >>> y0 = mantPN_sqrt(xx, 32)
+    >>> print(', '.join([digitPN.strF(y) for y in y0[:7]])) #     0.316227766, 3.16227766, -15.8113883, 158.113883, -1976.42354, 27669.9295, -415048.943, 6522197.67
+    0.316227766, 3.16227766, -15.8113883, 158.113883, -1976.42354, 27669.9295, -415048.943
+    >>> print(', '.join([digitPN.strF(y) for y in mantPN_mul(y0, y0, 32)[:5]])) # 0.1, 2.0, -9.40395481e-38, -1.88079096e-36, -1.50463277e-35, -5.77778983e-34, -1.00148357e-32, 3.08148791e-32
+    0.1, 2.0, 0.0, 0.0, 0.0
+    """
+    if x[0] <= 0:
+        raise ValueError("{sqrt(x)} 1st digit of x is not positive: {}".format(x[0]))
+    zero = x[0] * 0
+    LoN = 1
+    while _powersOfTwo[LoN] < N:
+        LoN += 1 # 2**LoN >= N
+    y = [zero for __ in range(_powersOfTwo[LoN])]   # [zero] * _powersOfTwo[LoN]
+    odwr = y[:]
+    outp = y[:]
+    if len(x) < len(y): # case if N != _powersOfTwo[LoN]
+        x = (x + y)[:len(y)]
+    outp[0] = digitPN.sqrt(x[0])
+    for w in range(1, LoN+1):
+        odwr = mantPN_inv(outp, _powersOfTwo[w])
+        y = mantPN_mul(odwr, x, _powersOfTwo[w]) #mantPN_div(outp,x,_powersOfTwo[w])
+        for j in range(_powersOfTwo[w-1]):
+            outp[j] = (outp[j] + y[j]) / 2 # 1/2 despite of () type 
+        for j in range(_powersOfTwo[w-1], _powersOfTwo[w]):
+            outp[j] = y[j] / 2
+    return outp[:N]
+    
+def mantPN_power_real(x, a, N):
+    """
+    self **a
+    ========
+    where exists self[0] **a (a is rather float, fract or int)
+    
+    Examples
+    --------
+    >>> xx = [0.1,2.,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 
+    ... 0,0,0,0]
+    >>> y0 = mantPN_inv(xx, 32)
+    >>> print(y0[:4])
+    [10.0, -200.0, 4000.0, -80000.0]
+    >>> y1 = mantPN_power_real(xx, -1, 32)
+    >>> print(y1[:6])
+    [10.0, -200.0, 4000.0, -80000.0, 1600000.0, -32000000.0]
+    >>> print('-- 1 ----------')
+    -- 1 ----------
+    >>> print(mantPN_mul(y0, xx, 32)[:25])
+    [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -140737488355328.0, 2251799813685248.0]
+    >>> print(mantPN_mul(y1, xx, 32)[:32])
+    [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2251799813685248.0, 0.0, 0.0, 1.8446744073709552e+19, 0.0, 0.0, 0.0, 0.0]
+    
+    >>> y05 = mantPN_power_real(xx, 0.5, 32)
+    >>> y05[:4]
+    [0.31622776601683794, 3.162277660168379, -15.811388300841895, 158.11388300841892]
+    >>> mantPN_power_real(y05, 2, 23)
+    [0.1, 2.0, 0.0, -1.1234667099445442e-14, 0.0, 0.0, 0.0, -7.362751430292565e-10, 0.0, 1.8848643661548967e-07, 0.0, 4.8252527773565355e-05, 0.0, 0.0, -0.3952847075210474, 6.324555320336758, -101.19288512538813, 0.0, 25905.37859209936, 0.0, 0.0, 0.0, 0.0]
+
+    """
+    zero = x[0] * 0
+    outp = [zero for __ in range(N)]     # y = [zero]*N
+    outp[0] = x[0] **a
+    a += 1
+    for k in range(1, N):
+        for j in range(1, k+1):
+            outp[k] = outp[k] + x[j] * outp[k-j] * (a*j/k - 1)
+        outp[k] = outp[k] / x[0]
+    return outp
+    
+def mantPN_exp(x, N):
+    """
+    exp(x)
+    ======
+    >>> xx = [0]*32
+    >>> xx[0:2] = [digitPN.flt('0.1'),digitPN.flt('2.')]
+    >>> y0 = mantPN_exp(xx, 32)
+    >>> print(', '.join([digitPN.strF(y) for y in y0[:4]]))
+    1.10517092, 2.21034184, 2.21034184, 1.47356122
+    >>> print(', '.join([digitPN.strF(y) for y in mantPN_ln(y0,32)[:4]]))
+    0.1, 2.0, 0.0, 0.0
+    """
+    zero = x[0]*0 
+    exp_x0 = digitPN.exp(x[0])
+    outp = [exp_x0 * x1 for x1 in x]
+    outp[0] = exp_x0
+    for k in range(1, N):
+        #outp[k] = exp_x0 * x[k]
+        for j in range(1, k):
+            outp[k] += x[k-j] * outp[j] * (1 - (zero + j)/k)
+    return outp
+
+def mantPN_ln(x, N):
+    """
+    ln(x)
+    =====
+    """
+    zero = x[0]*0 
+    ln_x0 = digitPN.log(x[0])
+    outp = x[:]
+    outp[0] = ln_x0
+    for k in range(1, N):
+        #outp[k] = x[k]
+        for j in range(1, k):
+            outp[k] -= x[j] * outp[k-j] * (1 - (zero + j)/k)
+        outp[k] = outp[k] / x[0]
+    return outp
+    
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+
 if __name__ == "__main__":
-    #print(getMantissaExponent_fromStr('','~',32)) # ([], 0)
-    #print(getMantissaExponent_fromStr('0','~',32)) #([0.0], 0)
-    #print(getMantissaExponent_fromStr('(~,2.~-0.3~)','~',32)) # ([0.0, 2.0, -0.3], 0)
-    #print(getMantissaExponent_fromStr('(~,2.~-0.3~)','~',32)) # ([0.0, 2.0, -0.3], 0)
-    #print(getMantissaExponent_fromStr('c(~','~',32)) # ValueError: 'c(~' error - unknow PN const format.
-    #print(getMantissaExponent_fromStr('const:(~2~,-4~4~-4~4~...~)','~',32)) #
-    #print(getMantissaExponent_fromStr('const:(~1~,2~2~2~2~...~)','~',32)) #
+    try:
+        __IPYTHON__
+        print('... __IPYTHON__ ...')
+        from digitPN import flt
+        Y = 1 / PolyNum('(~1~2~)') # Y(p) =   1 / (p + 2); y(t) = 1 * exp(-2*t)
+        h = flt('0.07') 
+        t = [tk*h for tk in range(len(Y))] #it sould be any length, but for test ...
+        y, err = zip( *(Y.invTr1LaplPN(_t) for _t in t) )
+        yPN = PolyNum(y)
+        errPN = PolyNum(err)
+        yPNok = PolyNum([digitPN.exp(-2*_t) for _t in t])
+        #yPN
+        #yPNok
+        #errPN
+        #yPNok - yPN
+        #plt.plot(y, 'b-', err, 'r--') 
+        import matplotlib.pyplot as plt
+        _ = plt.plot(y, 'b-', label='y(t)=(1/(~1~2~)).invTr1LaplPN (t)') 
+        _ = plt.plot(err, 'r--', label='err(t)') 
+        plt.grid(b=True)
+        _ = plt.legend()
+        plt.show()
+        
+        Y = PolyNum('(~0~,10~20~30~)') # 
+        h = flt('0.02') 
+        b0 = flt('5')
+        t = [(tk+1)*h for tk in range(len(Y))] #it sould be any length, but for test ...
+        y, err = zip( *(Y.invTr05exp_b0_LaplPN(_t, b0) for _t in t) )
+        def y_ok(t):
+            return flt('10')/digitPN.sqrt(digitPN.pi*t)*digitPN.exp(-b0*b0/t/4)+ \
+                flt('20')*digitPN.erfc(b0/digitPN.sqrt(t)/2)+ \
+                flt('60')*digitPN.sqrt(t/digitPN.pi)*digitPN.exp(-b0*b0/t/4)- \
+                flt('30')*b0*digitPN.erfc(b0/digitPN.sqrt(t)/2)
+        yOK = PolyNum([y_ok(t_) for t_ in t])
+        y = PolyNum(y)
+        
+        #plt.plot(y, 'b-', err, 'r--') 
+        import matplotlib.pyplot as plt
+        _ = plt.plot(y, 'b-', label='y(t) = (~0~,10~20~30~).invTr05exp_b0_LaplPN (t, b0)') 
+        _ = plt.plot(err, 'r--', label='err(t)') 
+        plt.grid(b=True)
+        _ = plt.legend()
+        plt.show()
+    except NameError:
+        print('... ~ iPython ...')
 
-#    p1 = PolyNum([1.,2,3],-3)
-#    p2 = PolyNum([10.,20,30],-1)
-#    print(p1,p2)
-#    p3 = p1 +p2
-#    print(p3)
-
+    
+    import time
+    import doctest
+    start = time.time()
+    doctest.testmod();
+    print('OK. sec: ',time.time() - start) #sometimes kernel restart is needed...
 #    from numpy.testing import (
 #        run_module_suite, assert_, assert_equal, assert_array_equal,
 #        assert_almost_equal, assert_array_almost_equal, assert_raises, 
 #        rundocs
 #        )
 #    rundocs(); print('OK.')
-    import time
-    import doctest
-    start = time.time()
-    doctest.testmod();
-    print('OK. sec: ',time.time() - start) #sometimes kernel restart is needed...
 
-    #from digitPN import flt
-    #Y = 1 / PolyNum('(~1~2~)') # Y(p) =   1 / (p + 2); y(t) = 1 * exp(-2*t)
-    #h = flt('0.07') 
-    #t = [tk*h for tk in range(len(Y))] #it sould be any length, but for test ...
-    #y, err = zip( *(Y.invTr1LaplPN(_t) for _t in t) )
-    #yPN = PolyNum(y)
-    #errPN = PolyNum(err)
-    #yPNok = PolyNum([digitPN.exp(-2*_t) for _t in t])
-    ##yPN
-    ##yPNok
-    ##errPN
-    ##yPNok - yPN
-    ##plt.plot(y, 'b-', err, 'r--') 
-    #import matplotlib.pyplot as plt
-    #_ = plt.plot(y, 'b-', label='y(t)=(1/(~1~2~)).invTr1LaplPN (t)') 
-    #_ = plt.plot(err, 'r--', label='err(t)') 
-    #plt.grid(b=True)
-    #_ = plt.legend()
-    #plt.show()
-    #
-    #Y = PolyNum('(~0~,10~20~30~)') # 
-    #h = flt('0.02') 
-    #b0 = flt('5')
-    #t = [(tk+1)*h for tk in range(len(Y))] #it sould be any length, but for test ...
-    #y, err = zip( *(Y.invTr05exp_b0_LaplPN(_t, b0) for _t in t) )
-    #def y_ok(t):
-    #    return flt('10')/digitPN.sqrt(digitPN.pi*t)*digitPN.exp(-b0*b0/t/4)+ \
-    #        flt('20')*digitPN.erfc(b0/digitPN.sqrt(t)/2)+ \
-    #        flt('60')*digitPN.sqrt(t/digitPN.pi)*digitPN.exp(-b0*b0/t/4)- \
-    #        flt('30')*b0*digitPN.erfc(b0/digitPN.sqrt(t)/2)
-    #yOK = PolyNum([y_ok(t_) for t_ in t])
-    #y = PolyNum(y)
-    
-    ##plt.plot(y, 'b-', err, 'r--') 
-    #import matplotlib.pyplot as plt
-    #_ = plt.plot(y, 'b-', label='y(t) = (~0~,10~20~30~).invTr05exp_b0_LaplPN (t, b0)') 
-    #_ = plt.plot(err, 'r--', label='err(t)') 
-    #plt.grid(b=True)
-    #_ = plt.legend()
-    #plt.show()
-    #
-    
-    
-    
-    #print(PolyNum([1,2,3]))
-    #print(PolyNum(''))
-    
     #import numpy as np
     #print(1 + np.finfo(np.longdouble).eps) #1.0000000000000002
     # np.finfo(np.longdouble).eps == 2.220446049250313e-16
