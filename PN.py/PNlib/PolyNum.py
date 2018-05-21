@@ -190,10 +190,14 @@ class PolyNum():
             exponentAdd += exponent1
         else: #mantissa_or_pN_or_str should be array_like
             #if isinstance(mantissa_or_pN_or_str, numbers.Number):
-            if hasattr(mantissa_or_pN_or_str, '__len__'):
-                mantissa_or_pN_or_str = list(mantissa_or_pN_or_str)
-            else: #scalar
-                mantissa_or_pN_or_str = [mantissa_or_pN_or_str]
+            if isinstance(mantissa_or_pN_or_str, (int, float)) \
+                    or isinstance(mantissa_or_pN_or_str, type(digitPN.onePNdig)):
+                mantissa_or_pN_or_str = [mantissa_or_pN_or_str] #scalar
+            else:
+                if not hasattr(mantissa_or_pN_or_str, '__len__'):#also scalar
+                    mantissa_or_pN_or_str = [mantissa_or_pN_or_str]
+                else: 
+                    mantissa_or_pN_or_str = list(mantissa_or_pN_or_str)
 
         self._initMant(mantissa_or_pN_or_str)
         self._exponent = exponentAdd
@@ -403,7 +407,9 @@ class PolyNum():
         """
         if isinstance(other, PolyNum):
             yMant = mantPN_mul(self.mantissa, other.mantissa, self._max_N)
-        elif not hasattr(other, '__len__'): #`other` is scalar
+        elif isinstance(other, (int, float)) \
+                or isinstance(other, type(digitPN.onePNdig)) \
+                or not hasattr(other, '__len__'): #`other` is scalar
             yMant = [x * other for x in self.mantissa]
         else:
             raise ValueError(str(other)+" <- invalid operand for PN __mul__")
@@ -415,7 +421,9 @@ class PolyNum():
     def __rmul__(self, other): # case: other * self 
         if isinstance(other, PolyNum):
             yMant = mantPN_mul(other.mantissa, self.mantissa, self._max_N)
-        elif not hasattr(other, '__len__'): #`other` is scalar
+        elif isinstance(other, (int, float)) \
+                or isinstance(other, type(digitPN.onePNdig)) \
+                or not hasattr(other, '__len__'): #`other` is scalar
             yMant = [other * x for x in self.mantissa]
         else:
             raise ValueError(str(other)+" <- invalid operand for PN __rmul__")
@@ -462,7 +470,9 @@ class PolyNum():
                 self.mantissa, 
                 mantPN_inv(other.mantissa, self._max_N), 
                 self._max_N)
-        elif not hasattr(other, '__len__'): #`other` is scalar
+        elif isinstance(other, (int, float)) \
+                or isinstance(other, type(digitPN.onePNdig)) \
+                or not hasattr(other, '__len__'): #`other` is scalar
             yMant = [x / other for x in self.mantissa]
         else:
             raise ValueError(str(other)+" <- invalid operand for PN __div__")
@@ -480,7 +490,9 @@ class PolyNum():
         else:
             if other == 1  or  other == digitPN.onePNdig:
                 yMant = inv
-            elif not hasattr(other, '__len__'): #`other` is scalar
+            elif isinstance(other, (int, float)) \
+                or isinstance(other, type(digitPN.onePNdig)) \
+                or not hasattr(other, '__len__'): #`other` is scalar
                 yMant = [other * x for x in inv]
             else:
                 raise ValueError(str(other)+" <- invalid operand for PN __rdiv__")

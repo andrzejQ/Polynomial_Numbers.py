@@ -150,7 +150,7 @@ def testSpeed():
     print(PolyNum('(~-1.1~2.2~,-3.3~)'))
     
 if __name__ == "__main__":
-    print(type(PolyNum('~0~')[0])) #mantissa[0]
+    print(type(PolyNum('~0~')[0])) #type (mantissa[0])
     import timeit
     setup = "from __main__ import testSpeed"
     print( timeit.timeit( "testSpeed()", setup=setup, number=10) )
