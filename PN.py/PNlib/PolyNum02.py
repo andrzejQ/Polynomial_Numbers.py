@@ -23,7 +23,7 @@ todo:
 """
 from __future__ import division, absolute_import, print_function
 from six import string_types #if isinstance(value, six.string_types):
-import numbers #isinstance(x, numbers.Integral)
+import numbers #isinstance(x, numbers.Integral) ...,numbers.Number)
 #but tested only in python 3.6+
 
 __all__ = ['PolyNum']
