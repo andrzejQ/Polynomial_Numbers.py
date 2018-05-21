@@ -16,7 +16,7 @@ PolyNum class
     where: m - PN mantissa         c - PN exponent
 
 version:
-    0.10, 2018-05-11
+    0.20, 2018-05-21
 todo:
     more convenient PN.exp() if self.exponent > 0
 
@@ -27,8 +27,6 @@ from __future__ import division, absolute_import, print_function, unicode_litera
 
 #import numbers #isinstance(x, numbers.Integral) ...,numbers.Number)
 #2018-05-21 x is scalar == not hasattr(x, '__len__')
-#   But hasattr() take a litle time, so it also can be assumed, that operands
-#   are only float, int, or PolyNum, to avoid checking hasattr() 
 
 __all__ = ['PolyNum']
 
@@ -190,14 +188,10 @@ class PolyNum():
             exponentAdd += exponent1
         else: #mantissa_or_pN_or_str should be array_like
             #if isinstance(mantissa_or_pN_or_str, numbers.Number):
-            if isinstance(mantissa_or_pN_or_str, (int, float)) \
-                    or isinstance(mantissa_or_pN_or_str, type(digitPN.onePNdig)):
-                mantissa_or_pN_or_str = [mantissa_or_pN_or_str] #scalar
-            else:
-                if not hasattr(mantissa_or_pN_or_str, '__len__'):#also scalar
-                    mantissa_or_pN_or_str = [mantissa_or_pN_or_str]
-                else: 
-                    mantissa_or_pN_or_str = list(mantissa_or_pN_or_str)
+            if hasattr(mantissa_or_pN_or_str, '__len__'):
+                mantissa_or_pN_or_str = list(mantissa_or_pN_or_str)
+            else: #scalar
+                mantissa_or_pN_or_str = [mantissa_or_pN_or_str]
 
         self._initMant(mantissa_or_pN_or_str)
         self._exponent = exponentAdd
@@ -352,10 +346,6 @@ class PolyNum():
         >>> p1 = PolyNum([3.,0,1,2],-2)
         >>> p1(5.)
         0.12224
-        
-        >>> p(PolyNum([5.]))  # 3. * 5.**0 + 0 * 5.**(-1)1 + 1 * 5.**(-2) + 2 * 5.**(-3)
-        PolyNum('(~3.056~)')
-        
         """  
         if not self.__nonzero__():
             return val * 0 # zero of val type
@@ -407,9 +397,7 @@ class PolyNum():
         """
         if isinstance(other, PolyNum):
             yMant = mantPN_mul(self.mantissa, other.mantissa, self._max_N)
-        elif isinstance(other, (int, float)) \
-                or isinstance(other, type(digitPN.onePNdig)) \
-                or not hasattr(other, '__len__'): #`other` is scalar
+        elif not hasattr(other, '__len__'): #`other` is scalar
             yMant = [x * other for x in self.mantissa]
         else:
             raise ValueError(str(other)+" <- invalid operand for PN __mul__")
@@ -421,9 +409,7 @@ class PolyNum():
     def __rmul__(self, other): # case: other * self 
         if isinstance(other, PolyNum):
             yMant = mantPN_mul(other.mantissa, self.mantissa, self._max_N)
-        elif isinstance(other, (int, float)) \
-                or isinstance(other, type(digitPN.onePNdig)) \
-                or not hasattr(other, '__len__'): #`other` is scalar
+        elif not hasattr(other, '__len__'): #`other` is scalar
             yMant = [other * x for x in self.mantissa]
         else:
             raise ValueError(str(other)+" <- invalid operand for PN __rmul__")
@@ -470,9 +456,7 @@ class PolyNum():
                 self.mantissa, 
                 mantPN_inv(other.mantissa, self._max_N), 
                 self._max_N)
-        elif isinstance(other, (int, float)) \
-                or isinstance(other, type(digitPN.onePNdig)) \
-                or not hasattr(other, '__len__'): #`other` is scalar
+        elif not hasattr(other, '__len__'): #`other` is scalar
             yMant = [x / other for x in self.mantissa]
         else:
             raise ValueError(str(other)+" <- invalid operand for PN __div__")
@@ -490,9 +474,7 @@ class PolyNum():
         else:
             if other == 1  or  other == digitPN.onePNdig:
                 yMant = inv
-            elif isinstance(other, (int, float)) \
-                or isinstance(other, type(digitPN.onePNdig)) \
-                or not hasattr(other, '__len__'): #`other` is scalar
+            elif not hasattr(other, '__len__'): #`other` is scalar
                 yMant = [other * x for x in inv]
             else:
                 raise ValueError(str(other)+" <- invalid operand for PN __rdiv__")
@@ -1357,26 +1339,27 @@ _powersOfTwo = tuple(_powersOfTwo)  # (1, 2, 4, 8, 16, 32, 64, 128)
 #######################################################################
 
 
-def mantPN_val(p, x):
+def mantPN_val(mant, x):
     """
-    Evaluate (Horner's scheme) a MantPN `p` at specific value `x` - scalar 
-    or other objects. Type of x is very important.
+    Evaluate (Horner's scheme) a MantPN `mant` at specific value `x` - scalar 
+    or other objects (like PN). Type of x is most important.
 
     Examples
     --------
-    >>> mantPN_val([3.0,0,1,2], 5.0)  # 3 * 5**0 + 0 * 5**(-1)1 + 1 * 5**(-2) + 2 * 5**(-3)
-    3.056
+    >>> mantPN_val([3.0,0,1,2.1], 5.0)  # 3 * 5**0 + 0 * 5**(-1) + 1 * 5**(-2) + 2 * 5**(-3)
+    3.0568
     >>> mantPN_val([3,0,1,2], 5)
     3.056
     >>> from fractions import Fraction
     >>> mantPN_val([3,0,1], Fraction(1,3))
     Fraction(12, 1)
-
     """
+    ### >>> p(PolyNum([5.]))  # 3. * 5.**0 + 0 * 5.**(-1)1 + 1 * 5.**(-2) + 2 * 5.**(-3)
+    ### PolyNum('(~3.056~)')    # # not important case, consuming long time
     x_1 = 1/x
-    y = p[-1]
-    pp = p[::-1]
-    for p1 in pp[1:]:
+    y = mant[-1]
+    mantR = mant[::-1]
+    for p1 in mantR[1:]:
         y = y * x_1 + p1
     return y
 
