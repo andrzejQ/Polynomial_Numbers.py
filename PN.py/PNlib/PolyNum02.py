@@ -258,27 +258,6 @@ class PolyNum():
         y._normalize0()
         return y
     
-    def asList(self):
-        '''
-        List normalized to exponent=0 for exponent <= 0
-        
-        '''
-        if not self.__nonzero__:
-            mantissaE0 = [self._mantissa[0] for __ in range(self._max_N)] #[0.,0.,0.,...]
-        else:
-            ex = -self.exponent 
-            if ex == 0:
-                mantissaE0 = self.mantissa
-            elif ex < 0:
-                raise ValueError(
-                    'PN exponent = {}. Can not convert to array if PN exponent > 0'\
-                    .format(-ex))
-            else: #(-self.exponent) > 0
-                zero = 0 * self._mantissa[0]
-                mantissaE0 = [zero for __ in range(ex)] + self._mantissa 
-            return mantissaE0 #return NX.asarray(mantissaE0)
-    # def __array__(self): return NX.asarray(self.asList)
-
     def __str__(self):
         '''
         Examples
@@ -887,10 +866,32 @@ class PolyNum():
             return iter(self.mantissa)
         if self._exponent > 0: 
                 raise ValueError("if exponent(={}) is positive, PN __iter__  is not allowed".format(self._exponent))
-        y = ([0 * self._mantissa[0]] * (-self._exponent)) \
+        zero = 0 * self._mantissa[0]
+        y = ([zero for __ in range(-self._exponent)]) \
                     + self.mantissa[:self._exponent] # [:-(-self._exponent)]
         return iter(y)
-    
+
+    def asList(self):
+        '''
+        List normalized to exponent=0 - only if exponent <= 0
+        Can be longer than _max_N
+        
+        '''
+        if not self.__nonzero__:
+            mantissaE0 = [self._mantissa[0] for __ in range(self._max_N)] #[0.,0.,0.,...]
+        else:
+            ex = -self.exponent 
+            if ex == 0:
+                mantissaE0 = self.mantissa
+            elif ex < 0:
+                raise ValueError(
+                    'PN exponent = {}. Can not convert to array if PN exponent > 0'\
+                    .format(-ex))
+            else: #(-self.exponent) > 0
+                zero = 0 * self._mantissa[0]
+                mantissaE0 = [zero for __ in range(ex)] + self._mantissa 
+            return mantissaE0 #return NX.asarray(mantissaE0)
+    # def __array__(self): return NX.asarray(self.asList)
     
 #&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
@@ -1249,7 +1250,26 @@ def getMantissaExponent_fromStr(s, sep, max_N):
     PolyNum('(~2.5~,-0.3~)*(~1~0~)**(-1)')
     >>> PolyNum('(~-1.1~2.2~,-3.3~)')
     PolyNum('(~-1.1~,2.2~-3.3~)*(~1~0~)**(1)')
+    >>> PolyNum('')
+    PolyNum('(~0.0~)')
+    >>> PolyNum('c(~)')
+    Traceback (most recent call last):
+    ... 
+    ValueError: 'c(~)' error - unknow PN const format.
     '''
+        ## >>> print(getMantissaExponent_fromStr('','~',32))
+        ## ([], 0)
+        ## >>> print(getMantissaExponent_fromStr('0','~',32))
+        ## ([0.0], 0)
+        ## >>> print(getMantissaExponent_fromStr('(~,2.~-0.3~)','~',32))
+        ## ([0.0, 2.0, -0.3], 0)
+        ## >>> print(getMantissaExponent_fromStr('(~,2.~-0.3~)','~',32))
+        ## ([0.0, 2.0, -0.3], 0)
+        ## >>> print(getMantissaExponent_fromStr('const:(~2~,-4~4~-4~4~...~)','~',8))
+        ## ([2, -4, 4, -4, 4, -4, 4, -4], 0)
+        ## >>> print(getMantissaExponent_fromStr('const:(~1~,2~2~2~2~...~)','~',8))
+        ## ([1, 2, 2, 2, 2, 2, 2, 2], 0)
+        
     if not s:
         return [], 0
     me = s.replace(" ", "").split('**')
@@ -1542,79 +1562,65 @@ def mantPN_ln(x, N):
 
 
 if __name__ == "__main__":
-    #print(getMantissaExponent_fromStr('','~',32)) # ([], 0)
-    #print(getMantissaExponent_fromStr('0','~',32)) #([0.0], 0)
-    #print(getMantissaExponent_fromStr('(~,2.~-0.3~)','~',32)) # ([0.0, 2.0, -0.3], 0)
-    #print(getMantissaExponent_fromStr('(~,2.~-0.3~)','~',32)) # ([0.0, 2.0, -0.3], 0)
-    #print(getMantissaExponent_fromStr('c(~','~',32)) # ValueError: 'c(~' error - unknow PN const format.
-    #print(getMantissaExponent_fromStr('const:(~2~,-4~4~-4~4~...~)','~',32)) #
-    #print(getMantissaExponent_fromStr('const:(~1~,2~2~2~2~...~)','~',32)) #
+    try:
+        __IPYTHON__
+        print('... __IPYTHON__ ...')
+        from digitPN import flt
+        Y = 1 / PolyNum('(~1~2~)') # Y(p) =   1 / (p + 2); y(t) = 1 * exp(-2*t)
+        h = flt('0.07') 
+        t = [tk*h for tk in range(len(Y))] #it sould be any length, but for test ...
+        y, err = zip( *(Y.invTr1LaplPN(_t) for _t in t) )
+        yPN = PolyNum(y)
+        errPN = PolyNum(err)
+        yPNok = PolyNum([digitPN.exp(-2*_t) for _t in t])
+        #yPN
+        #yPNok
+        #errPN
+        #yPNok - yPN
+        #plt.plot(y, 'b-', err, 'r--') 
+        import matplotlib.pyplot as plt
+        _ = plt.plot(y, 'b-', label='y(t)=(1/(~1~2~)).invTr1LaplPN (t)') 
+        _ = plt.plot(err, 'r--', label='err(t)') 
+        plt.grid(b=True)
+        _ = plt.legend()
+        plt.show()
+        
+        Y = PolyNum('(~0~,10~20~30~)') # 
+        h = flt('0.02') 
+        b0 = flt('5')
+        t = [(tk+1)*h for tk in range(len(Y))] #it sould be any length, but for test ...
+        y, err = zip( *(Y.invTr05exp_b0_LaplPN(_t, b0) for _t in t) )
+        def y_ok(t):
+            return flt('10')/digitPN.sqrt(digitPN.pi*t)*digitPN.exp(-b0*b0/t/4)+ \
+                flt('20')*digitPN.erfc(b0/digitPN.sqrt(t)/2)+ \
+                flt('60')*digitPN.sqrt(t/digitPN.pi)*digitPN.exp(-b0*b0/t/4)- \
+                flt('30')*b0*digitPN.erfc(b0/digitPN.sqrt(t)/2)
+        yOK = PolyNum([y_ok(t_) for t_ in t])
+        y = PolyNum(y)
+        
+        #plt.plot(y, 'b-', err, 'r--') 
+        import matplotlib.pyplot as plt
+        _ = plt.plot(y, 'b-', label='y(t) = (~0~,10~20~30~).invTr05exp_b0_LaplPN (t, b0)') 
+        _ = plt.plot(err, 'r--', label='err(t)') 
+        plt.grid(b=True)
+        _ = plt.legend()
+        plt.show()
+    except NameError:
+        print('... ~ iPython ...')
 
-#    p1 = PolyNum([1.,2,3],-3)
-#    p2 = PolyNum([10.,20,30],-1)
-#    print(p1,p2)
-#    p3 = p1 +p2
-#    print(p3)
-
+    
+    import time
+    import doctest
+    start = time.time()
+    doctest.testmod();
+    print('OK. sec: ',time.time() - start) #sometimes kernel restart is needed...
 #    from numpy.testing import (
 #        run_module_suite, assert_, assert_equal, assert_array_equal,
 #        assert_almost_equal, assert_array_almost_equal, assert_raises, 
 #        rundocs
 #        )
 #    rundocs(); print('OK.')
-    import time
-    import doctest
-    start = time.time()
-    doctest.testmod();
-    print('OK. sec: ',time.time() - start) #sometimes kernel restart is needed...
 
-    #from digitPN import flt
-    #Y = 1 / PolyNum('(~1~2~)') # Y(p) =   1 / (p + 2); y(t) = 1 * exp(-2*t)
-    #h = flt('0.07') 
-    #t = [tk*h for tk in range(len(Y))] #it sould be any length, but for test ...
-    #y, err = zip( *(Y.invTr1LaplPN(_t) for _t in t) )
-    #yPN = PolyNum(y)
-    #errPN = PolyNum(err)
-    #yPNok = PolyNum([digitPN.exp(-2*_t) for _t in t])
-    ##yPN
-    ##yPNok
-    ##errPN
-    ##yPNok - yPN
-    ##plt.plot(y, 'b-', err, 'r--') 
-    #import matplotlib.pyplot as plt
-    #_ = plt.plot(y, 'b-', label='y(t)=(1/(~1~2~)).invTr1LaplPN (t)') 
-    #_ = plt.plot(err, 'r--', label='err(t)') 
-    #plt.grid(b=True)
-    #_ = plt.legend()
-    #plt.show()
-    #
-    #Y = PolyNum('(~0~,10~20~30~)') # 
-    #h = flt('0.02') 
-    #b0 = flt('5')
-    #t = [(tk+1)*h for tk in range(len(Y))] #it sould be any length, but for test ...
-    #y, err = zip( *(Y.invTr05exp_b0_LaplPN(_t, b0) for _t in t) )
-    #def y_ok(t):
-    #    return flt('10')/digitPN.sqrt(digitPN.pi*t)*digitPN.exp(-b0*b0/t/4)+ \
-    #        flt('20')*digitPN.erfc(b0/digitPN.sqrt(t)/2)+ \
-    #        flt('60')*digitPN.sqrt(t/digitPN.pi)*digitPN.exp(-b0*b0/t/4)- \
-    #        flt('30')*b0*digitPN.erfc(b0/digitPN.sqrt(t)/2)
-    #yOK = PolyNum([y_ok(t_) for t_ in t])
-    #y = PolyNum(y)
-    
-    ##plt.plot(y, 'b-', err, 'r--') 
-    #import matplotlib.pyplot as plt
-    #_ = plt.plot(y, 'b-', label='y(t) = (~0~,10~20~30~).invTr05exp_b0_LaplPN (t, b0)') 
-    #_ = plt.plot(err, 'r--', label='err(t)') 
-    #plt.grid(b=True)
-    #_ = plt.legend()
-    #plt.show()
-    #
-    
-    
-    
-    #print(PolyNum([1,2,3]))
-    #print(PolyNum(''))
-    
     #import numpy as np
     #print(1 + np.finfo(np.longdouble).eps) #1.0000000000000002
     # np.finfo(np.longdouble).eps == 2.220446049250313e-16
