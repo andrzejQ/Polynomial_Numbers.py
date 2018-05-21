@@ -30,7 +30,7 @@ __all__ = ['PolyNum']
 
 #from itertools import zip_longest
 
-if __name__ == '__main__' or __name__ == 'PolyNum02':
+if __name__ == '__main__' or __name__ == 'PolyNum':
     #standalone tests: PolyNum -> rundocs(), doctest
     import PolyNumConf
     import digitPN

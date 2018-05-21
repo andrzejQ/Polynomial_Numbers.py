@@ -7,7 +7,7 @@ from __future__ import division, absolute_import, print_function
 
 
 import digitPN
-from PolyNum02 import PolyNum
+from PolyNum import PolyNum
 
 def testSpeed():
     PolyNum()

@@ -28,7 +28,7 @@ max_N = 64   #or 128 or 100 ..., 32 is mimnimum for doctest - PN significant dig
 sep = '~' # in PN str() and repr()
 
 FLOAT_TYPE = 'FLOAT-PYTHON'
-#FLOAT_TYPE = 'FLOAT-MPMATH-MPF'
+FLOAT_TYPE = 'FLOAT-MPMATH-MPF'
 #FLOAT_TYPE = 'FLOAT-NUMPY'
 
 MPMATH_PREC = 128   #38 dec. siginicant dig.
