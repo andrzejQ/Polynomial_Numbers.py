@@ -2,8 +2,8 @@
 from __future__ import division, absolute_import, print_function, unicode_literals
 #but tested only in python 3.6+
 
-#CPy: float: 0.066s, mp: 0.46s
-#iPy: float: 0.055s, mp: 0.38s
+#CPy: float: 0.024s, mp: 0.42s
+#iPy: float: 0.020s, mp: 0.36s
 
 
 import digitPN
