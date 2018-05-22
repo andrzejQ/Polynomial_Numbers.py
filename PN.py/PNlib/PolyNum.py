@@ -21,6 +21,7 @@ todo:
     more convenient PN.exp() if self.exponent > 0
 
 """
+# transcrypt -b -m -n -sf --opov PolyNum.py
 # __pragma__ ('skip')  #  http://www.transcrypt.org compile Python into JavaScript
 from __future__ import division, absolute_import, print_function, unicode_literals
 # __pragma__ ('noskip')
@@ -43,7 +44,7 @@ __all__ = ['PolyNum']
 # 3. Problem with loading digitPN
 # if TRANSCRYPT:....
 # 
-TRANSCRYPT = 1 #for test
+TRANSCRYPT = 1 #must be `True` for transcrypt compilation
 # __pragma__ ('skip')
 if not TRANSCRYPT: 
     if __name__ == '__main__' or __name__ == 'PolyNum':
@@ -56,7 +57,7 @@ if not TRANSCRYPT:
         # some config param. can be changed prior to import `digitPN`.
         from . import digitPN
 # __pragma__ ('noskip')
-if TRANSCRYPT: #never True - here is code for transcrypt instead of conf. import
+if TRANSCRYPT:
     import math
     class PolyNumConf: max_N = 32; sep = '~'; FLOAT_TYPE = 'FLOAT-PYTHON'
     class digitPN:
@@ -66,13 +67,12 @@ if TRANSCRYPT: #never True - here is code for transcrypt instead of conf. import
             if dig and chop_: dig = digitPN.chop(dig)
             try: return dig.__format__('1.'+str(signifi_)) #'1.9'
             except (ValueError, TypeError): return str(dig) 
-#        def strF( dig): return(str(dig))
         floor=math.floor; sqrt=math.sqrt; exp=math.exp; log=math.log; erfc=math.erfc; pi=math.pi
         def reprF( dig): return digitPN.strF(dig, chop_=False, signifi_=15)
         zeroPNdig = 0.0;         onePNdig  = 1.0
-        def chop( d, tol=epsilonPNdig*1024*1024, zero=zeroPNdig):
+        def chop( d, tol=2.22e-16*1024*1024, zero=0.0):
             return (d if (abs(d) > tol) else zero)
-        def PNdig_isclose( a, b, rel_tol=epsilonPNdig*128, abs_tol=epsilonPNdig*128): 
+        def PNdig_isclose( a, b, rel_tol=2.22e-16*128, abs_tol=2.22e-16*128): 
             if not a and not b:         return True
             diff = abs(a - b); 
             if not diff:                return True
@@ -315,8 +315,7 @@ class PolyNum(object):
         """
         digToStr = digitPN.strF
         """
-        if TRANSCRYPT:
-            def digToStr(d): return str(d) #? digToStr no working in transcrypt?
+#        if TRANSCRYPT: def digToStr(d): return str(d) #? digToStr no working in transcrypt?
         cutedStr = hasattr(self, '_strPN_cut') and self._strPN_cut < self._max_N
         ma = self.mantissa
         ex = self.exponent
@@ -1409,8 +1408,8 @@ def mantPN_val(mant, x):
     ### PolyNum('(~3.056~)')    # # not important case, consuming long time
     x_1 = 1/x
     y = mant[-1]
-    mantR = mant[::-1]  #transcrypt doesn`t like `[::-1]`
-    mantR = reversed(mant)
+    # mantR = mant[::-1]  #transcrypt doesn`t like `[::-1]`
+    mantR = list(reversed(mant))
     for p1 in mantR[1:]:
         y = y * x_1 + p1
     return y
@@ -1710,9 +1709,15 @@ if __name__ == "__main__": #transcrypt test
     #print(p12)
     #print(p_trap)
     print('JS-case: console (F12)')
-    a = PolyNum([2,1,0,5], -2)
-    print(a)
-    b = PolyNum('~0~,200~ 100~')
-    print(b)
+    a = PolyNum([2,1,0,5], -2);     print(a)
+    b = PolyNum('~0~,200~ 100~');   print(b)
     x = a * b   # __:opov
     print(x)
+    #print(x[:12]) #-not working in JS  `x.__getslice__ is not a function`
+    print(x.asList())
+
+    c = PolyNum([2.8,1,0,5], -2);     print(a)
+    d = PolyNum('~0~,200.1~ 100~');   print(b)
+    y = c * d   # __:opov
+    print(y)
+
