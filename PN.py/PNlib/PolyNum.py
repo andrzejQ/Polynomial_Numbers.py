@@ -56,13 +56,9 @@ if not TRANSCRYPT:
         # some config param. can be changed prior to import `digitPN`.
         from . import digitPN
 # __pragma__ ('noskip')
-if TRANSCRYPT: #never defined - here is code for transcrypt instead of importing conf.
+if TRANSCRYPT: #never True - here is code for transcrypt instead of conf. import
     import math
-    class PolyNumConf:
-        max_N = 32   #or 128 or 100 ..., 32 is mimnimum for doctest - PN significant digits number
-        sep = '~' # in PN str() and repr()
-        FLOAT_TYPE = 'FLOAT-PYTHON'
-        
+    class PolyNumConf: max_N = 32; sep = '~'; FLOAT_TYPE = 'FLOAT-PYTHON'
     class digitPN:
         epsilonPNdig = 2.220446049250313e-16
         def flt( digStr): return(float(digStr))
@@ -71,29 +67,20 @@ if TRANSCRYPT: #never defined - here is code for transcrypt instead of importing
             try: return dig.__format__('1.'+str(signifi_)) #'1.9'
             except (ValueError, TypeError): return str(dig) 
 #        def strF( dig): return(str(dig))
-        floor = math.floor
-        sqrt  = math.sqrt
-        exp   = math.exp
-        log   = math.log
-        erfc  = math.erfc
-        pi    = math.pi
+        floor=math.floor; sqrt=math.sqrt; exp=math.exp; log=math.log; erfc=math.erfc; pi=math.pi
         def reprF( dig): return digitPN.strF(dig, chop_=False, signifi_=15)
-        zeroPNdig = 0.0
-        onePNdig  = 1.0
-        def chop( d, tol=epsilonPNdig*1024*1024, zero=zeroPNdig):#tol: 6e-33 by eps=6e-39
-            """         Converts x close to zero to exact zero                """
-            if (abs(d) > tol): return d 
-            else:              return zero
+        zeroPNdig = 0.0;         onePNdig  = 1.0
+        def chop( d, tol=epsilonPNdig*1024*1024, zero=zeroPNdig):
+            return (d if (abs(d) > tol) else zero)
         def PNdig_isclose( a, b, rel_tol=epsilonPNdig*128, abs_tol=epsilonPNdig*128): 
             if not a and not b:         return True
-            diff = abs(a - b)
+            diff = abs(a - b); 
             if not diff:                return True
             if diff <= abs_tol:         return True
             absMax, abs2 = abs(a), abs(b)
             if absMax < abs2:            absMax = abs2
             if isinstance(diff,type(rel_tol)):   return diff <= rel_tol * absMax
             raise NotImplementedError 
-
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     
     
@@ -328,6 +315,8 @@ class PolyNum(object):
         """
         digToStr = digitPN.strF
         """
+        if TRANSCRYPT:
+            def digToStr(d): return str(d) #? digToStr no working in transcrypt?
         cutedStr = hasattr(self, '_strPN_cut') and self._strPN_cut < self._max_N
         ma = self.mantissa
         ex = self.exponent
@@ -337,12 +326,13 @@ class PolyNum(object):
         except ValueError: #try without formatting (i.e. for int)
             r1 = str(ma[0])
         r = '('+self._sep + r1 + self._sep #~
-            
+        
         if ma[0]: #non-zero PN
             ma = ma[1:]
             #ma = trim_zeros(ma, trim='b') #'b' to trim from back
             last = len(ma)
-            for d in ma[::-1]:
+            #for d in ma[::-1]: #transcrypt doesn`t like this
+            for d in reversed(ma):
                 if d:
                     break
                 else:
@@ -1414,7 +1404,8 @@ def mantPN_val(mant, x):
     ### PolyNum('(~3.056~)')    # # not important case, consuming long time
     x_1 = 1/x
     y = mant[-1]
-    mantR = mant[::-1]
+    mantR = mant[::-1]  #transcrypt doesn`t like this
+    mantR = reversed(mant)
     for p1 in mantR[1:]:
         y = y * x_1 + p1
     return y
@@ -1715,7 +1706,7 @@ if __name__ == "__main__": #transcrypt test
     #print(p_trap)
     print('JS-case: console (F12)')
     a = PolyNum([2,1,0,5], -2)
-    print(a.mantissa, a.exponent)
+    print(a)
     b = PolyNum([200, 100], -3)
     x = a * b   # __:opov
-    print(x.mantissa, x.exponent)
+    print(x)
