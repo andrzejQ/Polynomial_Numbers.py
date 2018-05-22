@@ -21,7 +21,9 @@ todo:
     more convenient PN.exp() if self.exponent > 0
 
 """
+# __pragma__ ('skip')  #  http://www.transcrypt.org compile Python into JavaScript
 from __future__ import division, absolute_import, print_function, unicode_literals
+# __pragma__ ('noskip')
 #from six import string_types #if isinstance(value, six.string_types)
 #but tested only in Python 3.6+ (CPython, IPyton/Spyder)
 
@@ -32,18 +34,66 @@ __all__ = ['PolyNum']
 
 #from itertools import zip_longest
 
-if __name__ == '__main__' or __name__ == 'PolyNum':
-    #standalone tests: PolyNum -> rundocs(), doctest
-    import PolyNumConf
-    import digitPN
-else: #relative package import    #print(f'''__nm__ = {__name__}''')
-    from . import PolyNumConf
-    # importing separately `PolyNumConf` in your app 
-    # some config param. can be changed prior to import `digitPN`.
-    from . import digitPN
-
-
 #######################################################################
+# Some modification for transcrypt compiler Python -> JavaScript
+# 1. not working:   #if hasattr(mantissa_or_pN_or_str, '__len__'):
+# if not isinstance(mantissa_or_pN_or_str,(int,float)):
+# 2. Problem with operator + for lists
+# # __:opov
+# 3. Problem with loading digitPN
+# if TRANSCRYPT:....
+# 
+TRANSCRYPT = 1 #for test
+# __pragma__ ('skip')
+if not TRANSCRYPT: 
+    if __name__ == '__main__' or __name__ == 'PolyNum':
+        #standalone tests: PolyNum -> rundocs(), doctest
+        import PolyNumConf
+        import digitPN
+    else: #relative package import    #print(f'''__nm__ = {__name__}''')
+        from . import PolyNumConf
+        # importing separately `PolyNumConf` in your app 
+        # some config param. can be changed prior to import `digitPN`.
+        from . import digitPN
+# __pragma__ ('noskip')
+if TRANSCRYPT: #never defined - here is code for transcrypt instead of importing conf.
+    import math
+    class PolyNumConf:
+        max_N = 32   #or 128 or 100 ..., 32 is mimnimum for doctest - PN significant digits number
+        sep = '~' # in PN str() and repr()
+        FLOAT_TYPE = 'FLOAT-PYTHON'
+        
+    class digitPN:
+        epsilonPNdig = 2.220446049250313e-16
+        def flt( digStr): return(float(digStr))
+        def strF(dig, chop_=True, signifi_=9):
+            if dig and chop_: dig = digitPN.chop(dig)
+            try: return dig.__format__('1.'+str(signifi_)) #'1.9'
+            except (ValueError, TypeError): return str(dig) 
+#        def strF( dig): return(str(dig))
+        floor = math.floor
+        sqrt  = math.sqrt
+        exp   = math.exp
+        log   = math.log
+        erfc  = math.erfc
+        pi    = math.pi
+        def reprF( dig): return digitPN.strF(dig, chop_=False, signifi_=15)
+        zeroPNdig = 0.0
+        onePNdig  = 1.0
+        def chop( d, tol=epsilonPNdig*1024*1024, zero=zeroPNdig):#tol: 6e-33 by eps=6e-39
+            """         Converts x close to zero to exact zero                """
+            if (abs(d) > tol): return d 
+            else:              return zero
+        def PNdig_isclose( a, b, rel_tol=epsilonPNdig*128, abs_tol=epsilonPNdig*128): 
+            if not a and not b:         return True
+            diff = abs(a - b)
+            if not diff:                return True
+            if diff <= abs_tol:         return True
+            absMax, abs2 = abs(a), abs(b)
+            if absMax < abs2:            absMax = abs2
+            if isinstance(diff,type(rel_tol)):   return diff <= rel_tol * absMax
+            raise NotImplementedError 
+
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     
     
@@ -188,7 +238,8 @@ class PolyNum(object):
             exponentAdd += exponent1
         else: #mantissa_or_pN_or_str should be array_like
             #if isinstance(mantissa_or_pN_or_str, numbers.Number):
-            if hasattr(mantissa_or_pN_or_str, '__len__'):
+            if not isinstance(mantissa_or_pN_or_str,(int,float)) or \
+                    hasattr(mantissa_or_pN_or_str, '__len__'):
                 mantissa_or_pN_or_str = list(mantissa_or_pN_or_str)
             else: #scalar
                 mantissa_or_pN_or_str = [mantissa_or_pN_or_str]
@@ -397,7 +448,8 @@ class PolyNum(object):
         """
         if isinstance(other, PolyNum):
             yMant = mantPN_mul(self.mantissa, other.mantissa, self._max_N)
-        elif not hasattr(other, '__len__'): #`other` is scalar
+        elif isinstance(other,(int,float)) or \
+                not hasattr(other, '__len__'): #`other` is scalar
             yMant = [x * other for x in self.mantissa]
         else:
             raise ValueError(str(other)+" <- invalid operand for PN __mul__")
@@ -409,7 +461,8 @@ class PolyNum(object):
     def __rmul__(self, other): # case: other * self 
         if isinstance(other, PolyNum):
             yMant = mantPN_mul(other.mantissa, self.mantissa, self._max_N)
-        elif not hasattr(other, '__len__'): #`other` is scalar
+        elif isinstance(other,(int,float)) or \
+                not hasattr(other, '__len__'): #`other` is scalar
             yMant = [other * x for x in self.mantissa]
         else:
             raise ValueError(str(other)+" <- invalid operand for PN __rmul__")
@@ -418,7 +471,7 @@ class PolyNum(object):
             expoOther = other.exponent
         return PolyNum(yMant, self.exponent + expoOther)
 
-    def __div__(self, other): #self / other
+    def __truediv__(self, other): #self / other
         """
         Examples
         --------
@@ -456,7 +509,8 @@ class PolyNum(object):
                 self.mantissa, 
                 mantPN_inv(other.mantissa, self._max_N), 
                 self._max_N)
-        elif not hasattr(other, '__len__'): #`other` is scalar
+        elif isinstance(other,(int,float)) or \
+                not hasattr(other, '__len__'): #`other` is scalar
             yMant = [x / other for x in self.mantissa]
         else:
             raise ValueError(str(other)+" <- invalid operand for PN __div__")
@@ -465,16 +519,17 @@ class PolyNum(object):
             expoOther = other.exponent
         return PolyNum(yMant, self.exponent - expoOther)
 
-    __truediv__ = __div__
+    #? __div__ = __truediv__
 
-    def __rdiv__(self, other): # case: other / self 
+    def __rtruediv__(self, other): # case: other / self 
         inv = mantPN_inv(self.mantissa, self._max_N)
         if isinstance(other, PolyNum):
             yMant = mantPN_mul(other.mantissa, inv, self._max_N)
         else:
             if other == 1  or  other == digitPN.onePNdig:
                 yMant = inv
-            elif not hasattr(other, '__len__'): #`other` is scalar
+            elif isinstance(other,(int,float)) or \
+                    not hasattr(other, '__len__'): #`other` is scalar
                 yMant = [other * x for x in inv]
             else:
                 raise ValueError(str(other)+" <- invalid operand for PN __rdiv__")
@@ -483,7 +538,7 @@ class PolyNum(object):
             expoOther = other.exponent
         return PolyNum(yMant, expoOther - self.exponent)
 
-    __rtruediv__ = __rdiv__
+    #? __rdiv__ = __rtruediv__
 
     def __add__(self, other):
         """
@@ -509,7 +564,8 @@ class PolyNum(object):
         PolyNum('(~100.0~,0.0~0.0~0.0~0.1~2.0~)')
 
         """
-        if not hasattr(other, '__len__') and not other:
+        if ( isinstance(other,(int,float)) or \
+                not hasattr(other, '__len__') ) and not other:
             return PolyNum(self) #PolyNum() - copy of mantissa
         otherPN = PolyNum(other)
         if not self.__nonzero__():
@@ -1570,8 +1626,7 @@ def mantPN_ln(x, N):
     
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
-
-
+# __pragma__ ('skip')
 if __name__ == "__main__":
     try:
         __IPYTHON__
@@ -1645,11 +1700,22 @@ if __name__ == "__main__":
     #print(sys.float_info)
     #sys.float_info(max=1.7976931348623157e+308, max_exp=1024, max_10_exp=308, min=2.2250738585072014e-308, min_exp=-1021, min_10_exp=-307, dig=15, mant_dig=53, epsilon=2.220446049250313e-16, radix=2, rounds=1)
     
-    
-    
     if PolyNumConf.FLOAT_TYPE == 'FLOAT-NUMPY':
         import numpy as np
         npPN = PolyNum(np.asarray([1,2,3,4]))
         print(npPN)
         print(np.asarray(npPN)[:16])
         print(npPN * 20)
+# __pragma__ ('noskip')
+    
+if __name__ == "__main__": #transcrypt test
+    #p12 = PolyNum('~1~2~')
+    #p_trap = PolyNum('const:(~2~,-4~4~-4~4~...~)')
+    #print(p12)
+    #print(p_trap)
+    print('JS-case: console (F12)')
+    a = PolyNum([2,1,0,5], -2)
+    print(a.mantissa, a.exponent)
+    b = PolyNum([200, 100], -3)
+    x = a * b   # __:opov
+    print(x.mantissa, x.exponent)
