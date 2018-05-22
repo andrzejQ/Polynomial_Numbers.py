@@ -331,7 +331,7 @@ class PolyNum(object):
             ma = ma[1:]
             #ma = trim_zeros(ma, trim='b') #'b' to trim from back
             last = len(ma)
-            #for d in ma[::-1]: #transcrypt doesn`t like this
+            #for d in ma[::-1]: #transcrypt doesn`t like `[::-1]`
             for d in reversed(ma):
                 if d:
                     break
@@ -1354,8 +1354,13 @@ def getMantissaExponent_fromStr(s, sep, max_N):
     
     # values
     mLR_ = mLR_.replace(sep+',','`,') # '(~1.2`,2.~-0.3~)' (for case '(`,2.~-0.3~)')
-    mLR = mLR_.strip('()'+sep).split('`,') # ['1.2`, '2.~-0.3']
-    if not mLR[0]: #ex. for input '`,2.~-0.3' -> mLR[0] == ''
+    #mLR = mLR_.strip('()'+sep).split('`,') # ['1.2`, '2.~-0.3']
+    mLR = mLR_.strip('()'+sep) #strip('~')  is not working in transcrypt...
+    # if mLR[0]==sep: mLR=mLR[1:]    # if mLR[-1]==sep: mLR=mLR[:-1] 
+    # __pragma__ ('js', '{}','if(__eq__(__getitem__(mLR, 0), sep)) {var mLR=__getslice__(mLR, 1, null, 1);} if(__eq__(__getitem__(mLR, __neg__(1)), sep)) {var mLR=__getslice__(mLR, 0, __neg__(1), 1);}')
+    mLR = mLR.split('`,')
+    # if TRANSCRYPT: print(f'2.getMantissaExponent_fromStr... mLR_={mLR_}  mLR={mLR} sep={sep}')
+    if not mLR[0]: #ex. for input '`,2.~-0.3' -> mLR[0] == ''       # __:tconv
         mL=['0']
     else:
         mL = mLR[0].split(sep)
@@ -1404,7 +1409,7 @@ def mantPN_val(mant, x):
     ### PolyNum('(~3.056~)')    # # not important case, consuming long time
     x_1 = 1/x
     y = mant[-1]
-    mantR = mant[::-1]  #transcrypt doesn`t like this
+    mantR = mant[::-1]  #transcrypt doesn`t like `[::-1]`
     mantR = reversed(mant)
     for p1 in mantR[1:]:
         y = y * x_1 + p1
@@ -1707,6 +1712,7 @@ if __name__ == "__main__": #transcrypt test
     print('JS-case: console (F12)')
     a = PolyNum([2,1,0,5], -2)
     print(a)
-    b = PolyNum([200, 100], -3)
+    b = PolyNum('~0~,200~ 100~')
+    print(b)
     x = a * b   # __:opov
     print(x)
