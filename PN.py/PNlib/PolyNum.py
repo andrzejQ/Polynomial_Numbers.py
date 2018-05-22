@@ -47,7 +47,7 @@ else: #relative package import    #print(f'''__nm__ = {__name__}''')
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     
     
-class PolyNum():
+class PolyNum(object):
     """\
     A Polynomial Number class
     =========================
