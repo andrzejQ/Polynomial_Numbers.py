@@ -1342,8 +1342,8 @@ def getMantissaExponent_fromStr(s, sep, max_N):
     if len(me) > 2:
         raise ValueError(
             "{!r} error - only 1 exponent allowed here.".format(s))
+    # if TRANSCRYPT: print(f'0.getMantissaExponent_fromStr...   me={me}') #?
     if len(me) > 1:
-        if TRANSCRYPT: print(f'0.getMantissaExponent_fromStr...   me={me}') #?
         expo = me[1]
         expo = expo.lstrip('(').rstrip(')')  #strip('()~')  is not working in transcrypt...
         # while len(expo) and expo[0]=='(': expo=expo[1:];        while len(expo) and expo[-1]==')': expo=expo[:-1]
@@ -1353,6 +1353,7 @@ def getMantissaExponent_fromStr(s, sep, max_N):
     else:
         expo = 0
     mLR_ = me[0].split('*')[0] # '(~1.2~,2.~-0.3~)' - ignore '*(~1~0~)'
+    # if TRANSCRYPT: print(f'0.getMantissaExponent_fromStr...  mLR_={mLR_} me={me} expo={expo}') #?
     
     # const 
     if mLR_[0] == 'c':
@@ -1382,7 +1383,9 @@ def getMantissaExponent_fromStr(s, sep, max_N):
     expo += len(mL) - 1 #ex. for input '(~-1.~2.2~,-3.3~)' -> expo += 1
     if len(mLR) > 1:
         # mLR_.strip(sep)  '~,~' case -> '~...
-        mR = mLR[1].strip(sep).split(sep) # ['2.', '-0.3']
+        mR = mLR[1].strip(sep) #lstrip('~')  is not working in transcrypt...
+        # __pragma__ ('js', '{}','''while (len(mR) && mR[0]=='~') {var mR=mR.slice(1);}''')
+        mR = mR.split(sep) # ['2.', '-0.3'] 
     else:
         mR = []
     m = mL + mR # ['1.2', '2.', '-0.3']
@@ -1721,6 +1724,7 @@ if __name__ == "__main__":
     
 if __name__ == "__main__": #transcrypt test
     print('JS-case: console (F12)')
+    PolyNum('(~1.2~,~2.5~-0.3~)')
     x = PolyNum([0.8,0.75], -2);     print(x)
 
     PolyNum('(~1.2~,2.5~-0.3~)*(~1~0~)**(-2)')
@@ -1851,40 +1855,45 @@ if __name__ == "__main__": #transcrypt test
     x1._strPN_cut = 7;  
     x = [ 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,\
                      17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32]
-    print('x------------------------------------------------------xx')
     
-    x1 = PolyNum(x)
-    x1[0]
-    x2 = PolyNum(x,-2)
-    x2[31]
-    x3 = PolyNum(x,-3)
-    (x3[:])[:32]
-    x4 = PolyNum(x,4)
-    x = [ 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,\
-                     17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32]
-    x1 = PolyNum(x)
-    list(x1)[:32]
-    x2 = PolyNum(x,-2)
-    list(x2)[:32]
-    x4 = PolyNum(x,4)
-    x4
+    ##:## x1 = PolyNum(x)
+    ##:## print(x1[0])
+    ##:## x2 = PolyNum(x,-2)
+    ##:## x2[12] ReferenceError: slice is not defined
+    ##:## x3 = PolyNum(x,-3)
+    ##:## #(x3[:])[:32] ReferenceError: slice is not defined
+    ##:## x4 = PolyNum(x,4)
+    ##:## x = [ 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,\
+    ##:##                  17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32]
+    ##:## x1 = PolyNum(x)
+    ##:## #list(x1)[:32] ReferenceError: slice is not defined
+    ##:## x2 = PolyNum(x,-2)
+    ##:## list(x2)[:32] 
+    ##:## x4 = PolyNum(x,4)
+    ##:## x4
     ##  from digitPN import flt
-    print('1-------------------------------')
     Y = PolyNum('(~0~,10~20~30~)') # 
     h = digitPN.flt('0.02') 
+    print('h=',h)
     b0 = digitPN.flt('5')
+    print('b0=',b0)
+    print('x------------------------------------------------------xx')
     t = [(tk+1)*h for tk in range(len(Y))] #it sould be any length, but for test ...
-    y, err = zip( *(Y.invTr05exp_b0_LaplPN(_t, b0) for _t in t) )
+    print('1-------------------------------')
+    # not working in JS
+    # y, err = zip( *(Y.invTr05exp_b0_LaplPN(_t, b0) for _t in t) )
+    # print(t, y, err)
     print('2-------------------------------')
-    def y_ok(t):
-        return digitPN.flt('10')/digitPN.sqrt(digitPN.pi*t)*digitPN.exp(-b0*b0/t/4)+ \
-                    digitPN.flt('20')*digitPN.erfc(b0/digitPN.sqrt(t)/2)+ \
-                    digitPN.flt('60')*digitPN.sqrt(t/digitPN.pi)*digitPN.exp(-b0*b0/t/4)- \
-                    digitPN.flt('30')*b0*digitPN.erfc(b0/digitPN.sqrt(t)/2)
-    yOK = PolyNum([y_ok(t_) for t_ in t])
-    print('3-------------------------------')
-    y = PolyNum(y)
-    ( y - yOK ).__abs__() <= (digitPN.epsilonPNdig*1024*1024) * PolyNum('const:(~1~,2~2~2~2~...~)')
+    # not working in JS
+    # def y_ok(t):
+    #     return digitPN.flt('10')/digitPN.sqrt(digitPN.pi*t)*digitPN.exp(-b0*b0/t/4)+ \
+    #                 digitPN.flt('20')*digitPN.erfc(b0/digitPN.sqrt(t)/2)+ \
+    #                 digitPN.flt('60')*digitPN.sqrt(t/digitPN.pi)*digitPN.exp(-b0*b0/t/4)- \
+    #                 digitPN.flt('30')*b0*digitPN.erfc(b0/digitPN.sqrt(t)/2)
+    # yOK = PolyNum([y_ok(t_) for t_ in t])
+    # print('3-------------------------------')
+    # y = PolyNum(y)
+    # ( y - yOK ).__abs__() <= (digitPN.epsilonPNdig*1024*1024) * PolyNum('const:(~1~,2~2~2~2~...~)')
     print('4-------------------------------')
     PolyNum('(~1.2~,2.2~-0.3~)*(~1~0~)**(2)')
     PolyNum('(~1.2~,2.5~-0.3~)')
