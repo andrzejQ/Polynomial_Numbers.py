@@ -1796,21 +1796,16 @@ if __name__ == "__main__": #transcrypt test
     p1 = PolyNum([1.,2,3],-2) #__iadd__   test 
     p1 += PolyNum([0.1,5],-4)
     print(p1)
-    print('x------------------------------------------------------x')
     p100 = 100. #__iadd__   test 
     print(p100)
-    print('ax------------------------------------------------------x')
     bx = PolyNum([0.1,2],-4)
     print(bx)
-    print('bx------------------------------------------------------x')
     p100 += PolyNum([0.1,2],-4)
     print(p100)
-    print('x------------------------------------------------------xy')
     PolyNum('(~1~,2~3~)') - PolyNum('(~10~,20~30~)')
     PolyNum('(~1~,2~3~)*(~1~0~)**(-3)') - PolyNum('(~10~,20~30~)*(~1~0~)**(-1)')
     PolyNum('(~1~,2~3~)*(~1~0~)**(-3)') - 100
     PolyNum('(~1~2~3~)') - 100
-    print('x------------------------------------------------------xy')
     100 - PolyNum([1.1,2,3],-2) #__radd__ test
     p1 = PolyNum([1.1,2.5,3],-2) #__iadd__   test 
     p1 -= PolyNum([0.1,5.1],-4)
@@ -1827,15 +1822,16 @@ if __name__ == "__main__": #transcrypt test
     y1
     y0xx = (y0 * xx); y0xx._strPN_cut = 22; y0xx
     y1xx = (y1 * xx); y1xx._strPN_cut = 22; y1xx
-    abs(PolyNum('(~2.4~,-1.1~-8.8~)'))
+    print( PolyNum('(~2.4~,-1.1~-8.8~)').__abs__() )
+    # abs(PolyNum('(~2.4~,-1.1~-8.8~)')) abs(...) cannot be used in transcrypt
     x = PolyNum('(~2.4~,-1.1~-8~)')
     x.isnonnegative()
-    abs(x).isnonnegative()
+    #abs(x).isnonnegative()
     PolyNum(0.0).isnonnegative()
     x <= x
-    x <= abs(x)
+    x <= x.__abs__()
     x <= 2*x
-    abs(x) <= 2*abs(x)
+    x.__abs__() <= 2*x.__abs__()
     x = PolyNum([2.4, 1.1])
     x >= x
     -x >= x
@@ -1855,7 +1851,7 @@ if __name__ == "__main__": #transcrypt test
     x1._strPN_cut = 7;  
     x = [ 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,\
                      17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32]
-    print('0-------------------------------')
+    print('x------------------------------------------------------xx')
     
     x1 = PolyNum(x)
     x1[0]
@@ -1888,7 +1884,7 @@ if __name__ == "__main__": #transcrypt test
     yOK = PolyNum([y_ok(t_) for t_ in t])
     print('3-------------------------------')
     y = PolyNum(y)
-    abs( y - yOK ) <= (digitPN.epsilonPNdig*1024*1024) * PolyNum('const:(~1~,2~2~2~2~...~)')
+    ( y - yOK ).__abs__() <= (digitPN.epsilonPNdig*1024*1024) * PolyNum('const:(~1~,2~2~2~2~...~)')
     print('4-------------------------------')
     PolyNum('(~1.2~,2.2~-0.3~)*(~1~0~)**(2)')
     PolyNum('(~1.2~,2.5~-0.3~)')
