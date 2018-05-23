@@ -436,7 +436,6 @@ class PolyNum(object):
         ... 
         ValueError: [5, 6, 7] <- invalid operand for PN __rmul__
         """
-        #if TRANSCRYPT: print(f'0.__mul__.') #?
         if isinstance(other, PolyNum):
             yMant = mantPN_mul(self.mantissa, other.mantissa, self._max_N)
         elif isinstance(other,(int,float)) or \
@@ -531,6 +530,11 @@ class PolyNum(object):
         return PolyNum(yMant, expoOther - self.exponent)
 
     #? __rdiv__ = __rtruediv__
+    
+    def __idiv__(self, other): # need for transcript
+        return self.__truediv__(other)
+    def __rdiv__(self, other): # need for transcript
+        return self.__rtruediv__(other)
 
     def __add__(self, other):
         """
@@ -1763,7 +1767,6 @@ if __name__ == "__main__": #transcrypt test
     p1 = PolyNum([1.,2,3],-2) #__imul__   test 
     p1 *= PolyNum([0.1,2],-5)
     p1     
-    print('x-------------------------------')
     p100 = 100. #__imul__   test 
     p100 *= PolyNum([0.1,2],-5)
     p100     
@@ -1776,10 +1779,11 @@ if __name__ == "__main__": #transcrypt test
     y3._strPN_cut = 7; y3
     p1 = PolyNum([1.,0.2,0.3],-2) #__idiv__   test 
     p1 /= PolyNum([0.1,0.2],-5)
-    p1._strPN_cut = 7; p1     
-    p100 = 100. #__idiv__   test 
-    p100 /= PolyNum([0.1,0.2],-5)
-    p100._strPN_cut = 7; p100     
+    p1._strPN_cut = 7; print(p1)
+    p100 = 100. #__idiv__    - impossible im transcrypt 
+    p100 /= PolyNum([0.1,0.2],-4)
+    p100._strPN_cut = 7; print(p100)
+    print('x------------------------------------------------------x')
     PolyNum('(~1~,2~3~)') + PolyNum('(~10~,20~30~)')
     PolyNum('(~1~,2~3~)*(~1~0~)**(-3)') + PolyNum('(~10~,20~30~)*(~1~0~)**(-1)')
     PolyNum('(~1~,2~3~)*(~1~0~)**(-3)') + 100
