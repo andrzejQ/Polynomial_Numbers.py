@@ -22,6 +22,7 @@ todo:
 
 """
 # transcrypt -b -m -n -sf --opov PolyNum.py
+# --opov should be removed from CLI - the first use `# __:opov` swich it off
 # __pragma__ ('skip')  #  http://www.transcrypt.org compile Python into JavaScript
 from __future__ import division, absolute_import, print_function, unicode_literals
 # __pragma__ ('noskip')
@@ -435,6 +436,7 @@ class PolyNum(object):
         ... 
         ValueError: [5, 6, 7] <- invalid operand for PN __rmul__
         """
+        #if TRANSCRYPT: print(f'0.__mul__.') #?
         if isinstance(other, PolyNum):
             yMant = mantPN_mul(self.mantissa, other.mantissa, self._max_N)
         elif isinstance(other,(int,float)) or \
@@ -448,6 +450,7 @@ class PolyNum(object):
         return PolyNum(yMant, self.exponent + expoOther)
 
     def __rmul__(self, other): # case: other * self 
+        # if TRANSCRYPT: print(f'0.__rmul__.') #?
         if isinstance(other, PolyNum):
             yMant = mantPN_mul(other.mantissa, self.mantissa, self._max_N)
         elif isinstance(other,(int,float)) or \
@@ -1717,7 +1720,7 @@ if __name__ == "__main__": #transcrypt test
     print(p_trap)
     a = PolyNum([2,1,0,5], -2);     print(a)
     b = PolyNum('~0~,200~ 100~');   print(b)
-    x = a * b   # __:opov
+    x = a * b
     print(x)
 #    x12 = x[:12] #transcrypt: not working in JS  `TypeError: x.__getslice__ is not a function`
 #    print(x12) #- list 
@@ -1729,7 +1732,7 @@ if __name__ == "__main__": #transcrypt test
 
     c = PolyNum([2.8,1,0,5], -2);     print(c)
     d = PolyNum('~0~,200.1~ 100~');   print(d)
-    y = c * d   # __:opov
+    y = c * d
     print(y)
     
 #def testSpeed():
@@ -1747,26 +1750,18 @@ if __name__ == "__main__": #transcrypt test
     p2 = PolyNum(p1, 12); p2
     PolyNum('(~0.1~,2e-38~4.3~6.1e-10~)').chop()
     PolyNum('(~1e-36~,2e-38~4.3~6.0~)').chop()
-    #p = PolyNum([3.,0,1,2])
-    #p(5.)  # 3. * 5.**0 + 0 * 5.**(-1)1 + 1 * 5.**(-2) + 2 * 5.**(-3)
-    #p1 = PolyNum([3.,0,1,2],-2)
-    #p1(5.)
+    p = PolyNum([3.,0,1,2])
+    p(5.)  # 3. * 5.**0 + 0 * 5.**(-1)1 + 1 * 5.**(-2) + 2 * 5.**(-3)
+    p1 = PolyNum([3.,0,1,2],-2)
+    p1(5.)
     ### p(PolyNum([5.]))  # 3. * 5.**0 + 0 * 5.**(-1)1 + 1 * 5.**(-2) + 2 * 5.**(-3)
     # not important case, consuming long time
-    print('x-------------------------------')
-    PolyNum([1.,2,3],-2) * 100
-    print('x-------------------------------')
+    print(PolyNum([1.,2,3],-2) * 100)
     PolyNum([1.,2,3],-2) * PolyNum([0.1,2],-5)
-    print('y-------------------------------')
     PolyNum([0.1,2],-5) * PolyNum([1.,2,3],-2)
-    print('y-------------------------------')
-    print('x-------------------------------')
     100 * PolyNum([1.,2,3],-2) #__rmul__ test
-    print('z-------------------------------')
     p1 = PolyNum([1.,2,3],-2) #__imul__   test 
-    print('z-------------------------------')
     p1 *= PolyNum([0.1,2],-5)
-    print('x-------------------------------')
     p1     
     print('x-------------------------------')
     p100 = 100. #__imul__   test 
