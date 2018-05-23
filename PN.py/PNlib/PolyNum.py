@@ -896,7 +896,7 @@ class PolyNum(object):
 #     def __setitem__(self, index, val):
 #         self._mantissa[index] = val
 #         return
- 
+
     def __iter__(self):
         """
         if __iter__ is not defined, then __getitem__ is used for list()
@@ -1704,20 +1704,22 @@ if __name__ == "__main__":
 # __pragma__ ('noskip')
     
 if __name__ == "__main__": #transcrypt test
-    #p12 = PolyNum('~1~2~')
-    #p_trap = PolyNum('const:(~2~,-4~4~-4~4~...~)')
-    #print(p12)
-    #print(p_trap)
     print('JS-case: console (F12)')
+    p_trap = PolyNum('const:(~2~,-4~4~-4~4~...~)')
+    print(p_trap)
     a = PolyNum([2,1,0,5], -2);     print(a)
     b = PolyNum('~0~,200~ 100~');   print(b)
     x = a * b   # __:opov
     print(x)
-    #print(x[:12]) #-not working in JS  `x.__getslice__ is not a function`
+#    x12 = x[:12] #transcrypt: not working in JS  `TypeError: x.__getslice__ is not a function`
+#    print(x12) #- list 
+#    print(slice(0,12))
+    print(list(x))
     print(x.asList())
+    print(x.asList()[:10])
+    
 
-    c = PolyNum([2.8,1,0,5], -2);     print(a)
-    d = PolyNum('~0~,200.1~ 100~');   print(b)
+    c = PolyNum([2.8,1,0,5], -2);     print(c)
+    d = PolyNum('~0~,200.1~ 100~');   print(d)
     y = c * d   # __:opov
     print(y)
-
