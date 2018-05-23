@@ -1722,8 +1722,8 @@ if __name__ == "__main__":
         print(npPN * 20)
 # __pragma__ ('noskip')
     
-if __name__ == "__main__": #transcrypt test
-    print('JS-case: console (F12)')
+if __name__ == "__main__": #transcrypt example
+    print('JS otput - transcrypt print()')
     PolyNum('(~1.2~,~2.5~-0.3~)')
     x = PolyNum([0.8,0.75], -2);     print(x)
 
@@ -1877,13 +1877,10 @@ if __name__ == "__main__": #transcrypt test
     print('h=',h)
     b0 = digitPN.flt('5')
     print('b0=',b0)
-    print('x------------------------------------------------------xx')
     t = [(tk+1)*h for tk in range(len(Y))] #it sould be any length, but for test ...
-    print('1-------------------------------')
     # not working in JS
     # y, err = zip( *(Y.invTr05exp_b0_LaplPN(_t, b0) for _t in t) )
     # print(t, y, err)
-    print('2-------------------------------')
     # not working in JS
     # def y_ok(t):
     #     return digitPN.flt('10')/digitPN.sqrt(digitPN.pi*t)*digitPN.exp(-b0*b0/t/4)+ \
@@ -1891,10 +1888,8 @@ if __name__ == "__main__": #transcrypt test
     #                 digitPN.flt('60')*digitPN.sqrt(t/digitPN.pi)*digitPN.exp(-b0*b0/t/4)- \
     #                 digitPN.flt('30')*b0*digitPN.erfc(b0/digitPN.sqrt(t)/2)
     # yOK = PolyNum([y_ok(t_) for t_ in t])
-    # print('3-------------------------------')
     # y = PolyNum(y)
     # ( y - yOK ).__abs__() <= (digitPN.epsilonPNdig*1024*1024) * PolyNum('const:(~1~,2~2~2~2~...~)')
-    print('4-------------------------------')
     PolyNum('(~1.2~,2.2~-0.3~)*(~1~0~)**(2)')
     PolyNum('(~1.2~,2.5~-0.3~)')
     PolyNum('(~1.2~,~2.5~-0.3~)')
@@ -1902,4 +1897,5 @@ if __name__ == "__main__": #transcrypt test
     PolyNum('(~0~,2.5~-0.3~)')
     PolyNum('(~,2.5~-0.3~)')
     print(PolyNum('(~-1.1~2.2~,-3.3~)'))
-    
+    print('-------------------------------')
+
