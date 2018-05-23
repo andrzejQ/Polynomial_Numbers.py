@@ -210,6 +210,7 @@ class PolyNum(object):
         After __init__ first PN digit (self.mantissa[0]) is non-zero or 
         (in zero PN case) mantissa is filled with zeroes.
         """
+        # if TRANSCRYPT: print(f'0.init...   mantissa_or_pN_or_str={mantissa_or_pN_or_str} exponentAdd={exponentAdd}') #?
         if isinstance(mantissa_or_pN_or_str, PolyNum):
             self._initMant(mantissa_or_pN_or_str.mantissa)
             self._exponent = exponentAdd
@@ -231,15 +232,16 @@ class PolyNum(object):
                 mantissa_or_pN_or_str = list(mantissa_or_pN_or_str)
             else: #scalar
                 mantissa_or_pN_or_str = [mantissa_or_pN_or_str]
-
         self._initMant(mantissa_or_pN_or_str)
         self._exponent = exponentAdd
         self._normalize0() #case: PolyNum('(~0~,2.~-0.3~)'), 100
+        # if TRANSCRYPT: print(f'5.init...   _mantissa={self._mantissa} _max_N={self._max_N}') #?
 
     def _initMant(self, mant=None):
         """
         default init: [0.0, 0.0, ...] zeros of type digitPN.zeroPNdig
         """
+        #if TRANSCRYPT: print(f'0.initMant...   mant={mant}') #?
         if isinstance(mant, PolyNum):
             self._mantissa = mant.mantissa
             return
@@ -316,7 +318,9 @@ class PolyNum(object):
         """
         digToStr = digitPN.strF
         """
-#        if TRANSCRYPT: def digToStr(d): return str(d) #? digToStr no working in transcrypt?
+        if TRANSCRYPT: 
+            def digToStr(d): return str(d) #? digToStr as param not working in transcrypt?
+        # if TRANSCRYPT: print(f'0._strPN...   _mantissa={self._mantissa} _exponent={self._exponent}') #?
         cutedStr = hasattr(self, '_strPN_cut') and self._strPN_cut < self._max_N
         ma = self.mantissa
         ex = self.exponent
@@ -1339,7 +1343,7 @@ def getMantissaExponent_fromStr(s, sep, max_N):
         raise ValueError(
             "{!r} error - only 1 exponent allowed here.".format(s))
     if len(me) > 1:
-        # if TRANSCRYPT: print(f'0.getMantissaExponent_fromStr...   me={me}') #?
+        if TRANSCRYPT: print(f'0.getMantissaExponent_fromStr...   me={me}') #?
         expo = me[1]
         expo = expo.lstrip('(').rstrip(')')  #strip('()~')  is not working in transcrypt...
         # while len(expo) and expo[0]=='(': expo=expo[1:];        while len(expo) and expo[-1]==')': expo=expo[:-1]
@@ -1384,7 +1388,6 @@ def getMantissaExponent_fromStr(s, sep, max_N):
     m = mL + mR # ['1.2', '2.', '-0.3']
     # mant = [float(d) for d in m]
     mant = [digitPN.flt(d) for d in m]
-    if TRANSCRYPT: print(f'2.getMantissaExponent_fromStr... mLR_={mLR_}  mLR={mLR} mant={mant} expo={expo} sep={sep}') #?
     return mant, expo
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -1718,10 +1721,10 @@ if __name__ == "__main__":
     
 if __name__ == "__main__": #transcrypt test
     print('JS-case: console (F12)')
+    x = PolyNum([0.8,0.75], -2);     print(x)
+
     PolyNum('(~1.2~,2.5~-0.3~)*(~1~0~)**(-2)')
 
-    p_trap = PolyNum('const:(~2~,-4~4~-4~4~...~)')
-    print(p_trap)
     a = PolyNum([2,1,0,5], -2);     print(a)
     b = PolyNum('~0~,200~ 100~');   print(b)
     x = a * b
@@ -1733,12 +1736,14 @@ if __name__ == "__main__": #transcrypt test
     print(x.asList())
     print(x.asList()[:10])
     
-
     c = PolyNum([2.8,1,0,5], -2);     print(c)
     d = PolyNum('~0~,200.1~ 100~');   print(d)
     y = c * d
     print(y)
-    
+
+    p_trap = PolyNum('const:(~2~,-4~4~-4~4~...~)')
+    print(p_trap)
+
 #def testSpeed():
     PolyNum()
     PolyNum('(~1.2~,2.5~-0.3~)*(~1~0~)**(-2)')
@@ -1783,7 +1788,6 @@ if __name__ == "__main__": #transcrypt test
     p100 = 100. #__idiv__    - impossible im transcrypt 
     p100 /= PolyNum([0.1,0.2],-4)
     p100._strPN_cut = 7; print(p100)
-    print('x------------------------------------------------------x')
     PolyNum('(~1~,2~3~)') + PolyNum('(~10~,20~30~)')
     PolyNum('(~1~,2~3~)*(~1~0~)**(-3)') + PolyNum('(~10~,20~30~)*(~1~0~)**(-1)')
     PolyNum('(~1~,2~3~)*(~1~0~)**(-3)') + 100
@@ -1791,14 +1795,22 @@ if __name__ == "__main__": #transcrypt test
     100 + PolyNum([1.,2,3],-2) #__radd__ test
     p1 = PolyNum([1.,2,3],-2) #__iadd__   test 
     p1 += PolyNum([0.1,5],-4)
-    p1     
+    print(p1)
+    print('x------------------------------------------------------x')
     p100 = 100. #__iadd__   test 
+    print(p100)
+    print('ax------------------------------------------------------x')
+    bx = PolyNum([0.1,2],-4)
+    print(bx)
+    print('bx------------------------------------------------------x')
     p100 += PolyNum([0.1,2],-4)
-    p100     
+    print(p100)
+    print('x------------------------------------------------------xy')
     PolyNum('(~1~,2~3~)') - PolyNum('(~10~,20~30~)')
     PolyNum('(~1~,2~3~)*(~1~0~)**(-3)') - PolyNum('(~10~,20~30~)*(~1~0~)**(-1)')
     PolyNum('(~1~,2~3~)*(~1~0~)**(-3)') - 100
     PolyNum('(~1~2~3~)') - 100
+    print('x------------------------------------------------------xy')
     100 - PolyNum([1.1,2,3],-2) #__radd__ test
     p1 = PolyNum([1.1,2.5,3],-2) #__iadd__   test 
     p1 -= PolyNum([0.1,5.1],-4)
