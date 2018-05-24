@@ -188,7 +188,8 @@ class PolyNum(object):
             exponentAdd += exponent1
         else: #mantissa_or_pN_or_str should be array_like
             #if isinstance(mantissa_or_pN_or_str, numbers.Number):
-            if hasattr(mantissa_or_pN_or_str, '__len__'):
+            if not isinstance(mantissa_or_pN_or_str,(int,float)) or \
+                    hasattr(mantissa_or_pN_or_str, '__len__'):
                 mantissa_or_pN_or_str = list(mantissa_or_pN_or_str)
             else: #scalar
                 mantissa_or_pN_or_str = [mantissa_or_pN_or_str]
@@ -409,7 +410,8 @@ class PolyNum(object):
     def __rmul__(self, other): # case: other * self 
         if isinstance(other, PolyNum):
             yMant = mantPN_mul(other.mantissa, self.mantissa, self._max_N)
-        elif not hasattr(other, '__len__'): #`other` is scalar
+        elif isinstance(other,(int,float)) or \
+                not hasattr(other, '__len__'): #`other` is scalar
             yMant = [other * x for x in self.mantissa]
         else:
             raise ValueError(str(other)+" <- invalid operand for PN __rmul__")
@@ -456,7 +458,8 @@ class PolyNum(object):
                 self.mantissa, 
                 mantPN_inv(other.mantissa, self._max_N), 
                 self._max_N)
-        elif not hasattr(other, '__len__'): #`other` is scalar
+        elif isinstance(other,(int,float)) or \
+                not hasattr(other, '__len__'): #`other` is scalar
             yMant = [x / other for x in self.mantissa]
         else:
             raise ValueError(str(other)+" <- invalid operand for PN __div__")
@@ -474,7 +477,8 @@ class PolyNum(object):
         else:
             if other == 1  or  other == digitPN.onePNdig:
                 yMant = inv
-            elif not hasattr(other, '__len__'): #`other` is scalar
+            elif isinstance(other,(int,float)) or \
+                    not hasattr(other, '__len__'): #`other` is scalar
                 yMant = [other * x for x in inv]
             else:
                 raise ValueError(str(other)+" <- invalid operand for PN __rdiv__")
@@ -515,7 +519,8 @@ class PolyNum(object):
         PolyNum('(~100.0~,0.0~0.0~0.0~0.1~2.0~)')
 
         """
-        if not hasattr(other, '__len__') and not other:
+        if ( isinstance(other,(int,float)) or \
+                not hasattr(other, '__len__') ) and not other:
             return PolyNum(self) #PolyNum() - copy of mantissa
         otherPN = PolyNum(other)
         if not self.__nonzero__():
