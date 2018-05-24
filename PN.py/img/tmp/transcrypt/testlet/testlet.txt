@@ -1,0 +1,4 @@
+
+AK@AK-prz MINGW32 /f/My/AK/Dokum/Badania/PN.py/PN.py (Transcrypt)
+$ transcrypt -b -m -n -sf --opov autotest.py
+$ PYTHONPATH=".:$PYTHONPATH" transcrypt -r -sf --opov autotest.py
