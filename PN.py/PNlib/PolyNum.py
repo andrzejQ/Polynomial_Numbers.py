@@ -27,6 +27,7 @@ from __future__ import division, absolute_import, print_function, unicode_litera
 
 #import numbers #isinstance(x, numbers.Integral) ...,numbers.Number)
 #2018-05-21 x is scalar == not hasattr(x, '__len__')
+#2018-05-24 x is scalar == isinstance(x,(int,float)) or not hasattr(x, '__len__')
 
 __all__ = ['PolyNum']
 
@@ -398,7 +399,8 @@ class PolyNum(object):
         """
         if isinstance(other, PolyNum):
             yMant = mantPN_mul(self.mantissa, other.mantissa, self._max_N)
-        elif not hasattr(other, '__len__'): #`other` is scalar
+        elif isinstance(other,(int,float)) or \
+                not hasattr(other, '__len__'): #`other` is scalar
             yMant = [x * other for x in self.mantissa]
         else:
             raise ValueError(str(other)+" <- invalid operand for PN __mul__")
