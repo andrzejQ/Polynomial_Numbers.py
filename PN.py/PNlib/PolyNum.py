@@ -22,7 +22,8 @@ todo:
 
 """
 # transcrypt -b -m -n -sf --opov PolyNum.py
-# --opov should be removed from CLI - the first use `# __:opov` swich it off
+# todo: --opov should be removed from CLI and insert as # __pragma__ ('opov')
+# todo: autotest.py
 # __pragma__ ('skip')  #  http://www.transcrypt.org compile Python into JavaScript
 from __future__ import division, absolute_import, print_function, unicode_literals
 # __pragma__ ('noskip')
