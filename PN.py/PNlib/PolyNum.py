@@ -58,7 +58,7 @@ class PolyNum(object):
     equations using Mikusinski's or Bellert's approach.
     http://www.pei.prz.edu.pl/%7Ekubaszek/index_en.html
     
-    We assume **Polynomial Number** (**PN**) in form:                                  
+    We assume **Polynomial Number** (**PN**) in form:              
 
             (~m_0 ~, m_1 ~ m_2 ~  ...~) · (~1~0~)^c               
                
@@ -293,7 +293,8 @@ class PolyNum(object):
             ma = ma[1:]
             #ma = trim_zeros(ma, trim='b') #'b' to trim from back
             last = len(ma)
-            for d in ma[::-1]:
+            #for d in ma[::-1]: #transcrypt doesn`t like `[::-1]`
+            for d in reversed(ma):
                 if d:
                     break
                 else:
@@ -1300,7 +1301,10 @@ def getMantissaExponent_fromStr(s, sep, max_N):
         raise ValueError(
             "{!r} error - only 1 exponent allowed here.".format(s))
     if len(me) > 1:
-        expo = int(me[1].strip('()')) # -2
+        # expo = int(me[1].strip('()')) 
+        expo = me[1]
+        expo = expo.lstrip('(').rstrip(')')
+        expo = int(expo) # -2
     else:
         expo = 0
     mLR_ = me[0].split('*')[0] # '(~1.2~,2.~-0.3~)' - ignore '*(~1~0~)'
@@ -1321,7 +1325,9 @@ def getMantissaExponent_fromStr(s, sep, max_N):
     
     # values
     mLR_ = mLR_.replace(sep+',','`,') # '(~1.2`,2.~-0.3~)' (for case '(`,2.~-0.3~)')
-    mLR = mLR_.strip('()'+sep).split('`,') # ['1.2`, '2.~-0.3']
+    # mLR = mLR_.strip('()'+sep).split('`,') # ['1.2`, '2.~-0.3']
+    mLR = mLR_.lstrip('('+sep).rstrip(')'+sep)
+    mLR = mLR.split('`,')                    # ['1.2`, '2.~-0.3']
     if not mLR[0]: #ex. for input '`,2.~-0.3' -> mLR[0] == ''
         mL=['0']
     else:
@@ -1329,7 +1335,8 @@ def getMantissaExponent_fromStr(s, sep, max_N):
     expo += len(mL) - 1 #ex. for input '(~-1.~2.2~,-3.3~)' -> expo += 1
     if len(mLR) > 1:
         # mLR_.strip(sep)  '~,~' case -> '~...
-        mR = mLR[1].strip(sep).split(sep) # ['2.', '-0.3']
+        mR = mLR[1].lstrip(sep)
+        mR = mR.split(sep) # ['2.', '-0.3']
     else:
         mR = []
     m = mL + mR # ['1.2', '2.', '-0.3']
@@ -1371,7 +1378,8 @@ def mantPN_val(mant, x):
     ### PolyNum('(~3.056~)')    # # not important case, consuming long time
     x_1 = 1/x
     y = mant[-1]
-    mantR = mant[::-1]
+    # mantR = mant[::-1]  #transcrypt doesn`t like `[::-1]`
+    mantR = list(reversed(mant))
     for p1 in mantR[1:]:
         y = y * x_1 + p1
     return y
