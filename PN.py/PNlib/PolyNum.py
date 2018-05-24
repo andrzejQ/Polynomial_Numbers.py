@@ -418,7 +418,7 @@ class PolyNum(object):
             expoOther = other.exponent
         return PolyNum(yMant, self.exponent + expoOther)
 
-    def __div__(self, other): #self / other
+    def __truediv__(self, other): #self / other
         """
         Examples
         --------
@@ -465,9 +465,9 @@ class PolyNum(object):
             expoOther = other.exponent
         return PolyNum(yMant, self.exponent - expoOther)
 
-    __truediv__ = __div__
+    #? __div__ = __truediv__
 
-    def __rdiv__(self, other): # case: other / self 
+    def __rtruediv__(self, other): # case: other / self 
         inv = mantPN_inv(self.mantissa, self._max_N)
         if isinstance(other, PolyNum):
             yMant = mantPN_mul(other.mantissa, inv, self._max_N)
@@ -483,8 +483,14 @@ class PolyNum(object):
             expoOther = other.exponent
         return PolyNum(yMant, expoOther - self.exponent)
 
-    __rtruediv__ = __rdiv__
-
+    #? __rdiv__ = __rtruediv__
+    
+    def __idiv__(self, other): # need for transcript
+        return self.__truediv__(other)
+    def __rdiv__(self, other): # need for transcript
+        return self.__rtruediv__(other)
+    def __div__(self, other): #?
+        return self.__truediv__(other)
     def __add__(self, other):
         """
         >>> PolyNum('(~1~,2~3~)') + PolyNum('(~10~,20~30~)')
