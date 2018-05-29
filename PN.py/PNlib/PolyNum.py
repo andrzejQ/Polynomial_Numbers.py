@@ -32,6 +32,7 @@ from __future__ import division, absolute_import, print_function, unicode_litera
 
 #import numbers #isinstance(x, numbers.Integral) ...,numbers.Number)
 #2018-05-21 x is scalar == not hasattr(x, '__len__')
+#2018-05-24 x is scalar == isinstance(x,(int,float)) or not hasattr(x, '__len__')
 
 __all__ = ['PolyNum']
 
@@ -540,6 +541,8 @@ class PolyNum(object):
         return self.__truediv__(other)
     def __rdiv__(self, other): # need for transcript
         return self.__rtruediv__(other)
+    def __div__(self, other): #?
+        return self.__truediv__(other)
 
     def __add__(self, other):
         """
@@ -1349,7 +1352,7 @@ def getMantissaExponent_fromStr(s, sep, max_N):
         expo = expo.lstrip('(').rstrip(')')  #strip('()~')  is not working in transcrypt...
         # while len(expo) and expo[0]=='(': expo=expo[1:];        while len(expo) and expo[-1]==')': expo=expo[:-1]
         # __pragma__ ('js', '{}','''while (len(expo) && expo[0]=='(') {var expo=expo.slice(1);} while (len(expo) && expo [expo.length-1]==')') {var expo=expo.slice(0, -1);}''')
-        expo = int(expo)
+        expo = int(expo) # -2
         
     else:
         expo = 0
@@ -1384,7 +1387,7 @@ def getMantissaExponent_fromStr(s, sep, max_N):
     expo += len(mL) - 1 #ex. for input '(~-1.~2.2~,-3.3~)' -> expo += 1
     if len(mLR) > 1:
         # mLR_.strip(sep)  '~,~' case -> '~...
-        mR = mLR[1].strip(sep) #lstrip('~')  is not working in transcrypt...
+        mR = mLR[1].lstrip(sep) #lstrip('~')  is not working in transcrypt...
         # __pragma__ ('js', '{}','''while (len(mR) && mR[0]=='~') {var mR=mR.slice(1);}''')
         mR = mR.split(sep) # ['2.', '-0.3'] 
     else:
