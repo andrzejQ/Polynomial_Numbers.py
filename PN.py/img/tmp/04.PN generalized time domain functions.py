@@ -64,7 +64,7 @@ get_ipython().run_line_magic('matplotlib', 'inline')
 # \{x_b(t)\} = \color{brown}{ p \cdot \{1\} \cdot \ } \color{magenta}{ \cfrac{1}{p^2 + p + 4}\ \exp(-(-0.1)\sqrt{p^2 +1}) } 
 # $ 
 # (see
-# [Mikusinski's remarks about negative delay operator](http://www.pei.prz.edu.pl/~kubaszek/smacd06/JM_OperCalc.html)).
+# [Mikusinski's remarks about negative delay operator](https://pei.prz.edu.pl/~kubaszek/smacd06/JM_OperCalc.html)).
 
 # In[3]:
 
@@ -148,7 +148,7 @@ plt.show();
 
 
 # Neutralizing negative delay operator we get regular function for $t \geq 0$
-#  (see the last part of [Mikusinski's remarks about negative delay operator](http://www.pei.prz.edu.pl/~kubaszek/smacd06/JM_OperCalc.html)):
+#  (see the last part of [Mikusinski's remarks about negative delay operator](https://pei.prz.edu.pl/~kubaszek/smacd06/JM_OperCalc.html)):
 
 # $ \{x_b(t)\} = \color{brown}{ p \cdot \{1\} \cdot \ } \color{magenta}{ \cfrac{1}{p^2 + p + 4}\ \exp(-(-T_0)\sqrt{p^2 +1}) \cdot \exp(-T_0\, p)} $
 # 

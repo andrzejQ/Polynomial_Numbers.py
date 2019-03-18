@@ -67,7 +67,7 @@ get_ipython().run_line_magic('matplotlib', 'notebook')
 # \{x_b(t)\} = \color{brown}{ p \cdot \{1\} \cdot \ } \color{magenta}{ \cfrac{1}{p^2 + p + 4}\ \exp(-(-0.1)\sqrt{p^2 +1}) } 
 # $ 
 # (see
-# [Mikusinski's remarks about negative delay operator](http://www.pei.prz.edu.pl/~kubaszek/smacd06/JM_OperCalc.html)).
+# [Mikusinski's remarks about negative delay operator](https://pei.prz.edu.pl/~kubaszek/smacd06/JM_OperCalc.html)).
 
 # In[2]:
 

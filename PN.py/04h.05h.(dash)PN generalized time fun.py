@@ -131,7 +131,7 @@ def compute_fig_xy_(a, h, x_p_, blackBox_): # arg: sliders values, x_p_(a, p), b
 app.layout = html.Div([
     dcc.Markdown(children=r'''
     
-[ Andrzej Kubaszek, Rzeszow University of Technology, 2018](http://www.pei.prz.edu.pl/%7Ekubaszek/index_en.html)
+[ Andrzej Kubaszek, Rzeszow University of Technology, 2018](https://pei.prz.edu.pl/%7Ekubaszek/index_en.html)
 
 Floating point arithmetic for 'numbers' with digits such as real numbers, can be used to solve differential or difference equations using Mikusinski's or Bellert's operational calculus theory.
 
@@ -182,7 +182,7 @@ or function containing negative delay, like
 {*x_b(t)*} = *p* · {1} · (1 / (*p*² + *p* + 4) exp( -(-0.1)√(*p*² +1) )
 
 (see
-[Mikusinski's remarks about negative delay operator](http://www.pei.prz.edu.pl/~kubaszek/smacd06/JM_OperCalc.html)).
+[Mikusinski's remarks about negative delay operator](https://pei.prz.edu.pl/~kubaszek/smacd06/JM_OperCalc.html)).
 
 ### Digital samples of derivative of the step function:
 
@@ -247,7 +247,7 @@ x_b = p * f_1111 * 1 / (p**2 + p + 4) * ( -(-T_0) * ( (p**2 +1).sqrt() ) ).exp()
     dcc.Markdown(children=r'''
 ---
 Neutralizing negative delay operator we get regular function for $t ≥ 0$
- (see the last part of [Mikusinski's remarks about negative delay operator](http://www.pei.prz.edu.pl/~kubaszek/smacd06/JM_OperCalc.html)):
+ (see the last part of [Mikusinski's remarks about negative delay operator](https://pei.prz.edu.pl/~kubaszek/smacd06/JM_OperCalc.html)):
 
 {*x_b(t)*} = *p* · {1} · (1 / (*p*² + *p* + 4) exp( -(-T₀)√(*p*² +1) ) · exp(-T₀  p)
 
@@ -365,7 +365,7 @@ Although *x(t)* is "unrealistic function" (pure delay operator with negative del
 * [PNlib on GitHub (Python library)](https://github.com/andrzejQ/Polynomial_Numbers.py)
 * [jupyter notebooks index (nbviewer, GitHub)](index.ipynb)
 * [mybinder - jupyter notebooks index (live)](https://mybinder.org/v2/gh/andrzejQ/Polynomial_Numbers.py.git/master?filepath=index.ipynb)
-* [html - www.pei.prz.edu.pl/~kubaszek](http://www.pei.prz.edu.pl/%7Ekubaszek/index_en.html)
+* [html - pei.prz.edu.pl/~kubaszek](https://pei.prz.edu.pl/%7Ekubaszek/index_en.html)
 
 ''' )
 ], style={'padding':30}, className="container"

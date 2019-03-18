@@ -7,7 +7,7 @@ PolyNum class
     Floating point arithmetic for "numbers" with digit like real number 
     or items from any arbitrary field, allow solving differential or difference 
     equations using Mikusinski's or Bellert's approach.
-    http://www.pei.prz.edu.pl/%7Ekubaszek/index_en.html
+    https://pei.prz.edu.pl/%7Ekubaszek/index_en.html
     
     We assume PN in form:                                  
 
@@ -56,7 +56,7 @@ class PolyNum(object):
     Floating point arithmetic for "numbers" with digit like real number 
     or items from any arbitrary field, allow solving differential or difference 
     equations using Mikusinski's or Bellert's approach.
-    http://www.pei.prz.edu.pl/%7Ekubaszek/index_en.html
+    https://pei.prz.edu.pl/%7Ekubaszek/index_en.html
     
     We assume **Polynomial Number** (**PN**) in form:              
 
