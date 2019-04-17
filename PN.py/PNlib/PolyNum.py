@@ -1201,35 +1201,34 @@ class PolyNum(object):
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     
-###def cerf (x):
+###def erfc(x):
 ###    """
-###    otpt: cerf(x), err
+###    otpt: erfc(x), err
 ###    """
 ###    zero = x * 0
 ###    one = zero + 1 #1 of type zero
 ###    if x == 0:
 ###        return one, zero
-###    # x != 0 :
+###    xPosit = ( x>0 )
+###    x = abs(x)
+###
 ###    max_I = 2 / digitPN.epsilonPNdig #big float
-###    #if x < 4.647:# for 80bits longdouble both alg. gives err=3E-20
-###                  #                  przy wartosci cerf=4.9693771E-11 (tylko 9 cyfr istotnych)}
-###    # try algorithm for small x value first
-###    pi_ = digitPN.pi
-###    wk0 = -(x*x).exp() * 2 * x / pi_.sqrt()
-###    out1 = wk0
-###    k = 1
-###    while 1:
-###        wk0 = wk0 * 2*x.sqr() / (2*k+1)
-###        stop = (abs(wk0) * max_I < abs(out1))
-###        out1 = out1 + wk0
-###        k += 1
-###        if stop:   #or (k+2 > max_N)
-###            break
-###    cerf0 = 1-out1
-###    err0 = abs(wk0)
-###    if err0/abs(out1) > 10*digitPN.epsilonPNdig:
-###        #try for big x value
-###        wk0 = -(x*x).exp() / (pi_.sqrt()*x)
+###    sqrt_pi = digitPN.pi.sqrt()
+###    if x < 1:
+###        wk0 = (-x*x).exp() * 2 * x / sqrt_pi
+###        out1 = wk0
+###        k = 1
+###        while 1:
+###            wk0 = wk0 * 2 * x*x / (2*k+1)
+###            stop = (abs(wk0) * max_I < abs(out1))
+###            out1 = out1 + wk0
+###            k += 1
+###            if stop:   #or (k+2 > max_N)
+###                break
+###        erfc0 = abs(1-out1)
+###        err0 = abs(wk0)
+###    else: #big x value
+###        wk0 = (-x*x).exp() / (sqrt_pi*x)
 ###        out = wk0
 ###        abs_wk0 = abs(wk0)
 ###        k = 1 
@@ -1246,12 +1245,9 @@ class PolyNum(object):
 ###                k += 1
 ###            if stop:   #or (k+2 > max_N)
 ###                break
-###        cerf111 = out
-###        err111 = abs_wk0
-###        if err111 < err0:
-###            cerf0, err0 = cerf111, err111
-###    return cerf0, err0 # cerf()
-
+###        erfc0 = abs(out)
+###        err0 = abs_wk0
+###    return (erfc0 if xPosit else 2 - erfc0), err0 # erfc()
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
